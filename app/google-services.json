@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "748950851084",
+    "project_id": "inf2007-team12",
+    "storage_bucket": "inf2007-team12.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:748950851084:android:332a461f14b852cf3fa829",
+        "android_client_info": {
+          "package_name": "com.inf2007team12.mobileapplication"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBcFhxA21LN53zTQV8kn7kyGto5iXGAp-o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:748950851084:android:748f4b369dc2be873fa829",
+        "android_client_info": {
+          "package_name": "com.inf2007team12mobileapplication"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBcFhxA21LN53zTQV8kn7kyGto5iXGAp-o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
