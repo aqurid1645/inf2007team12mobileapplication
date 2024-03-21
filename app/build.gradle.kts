@@ -77,4 +77,6 @@ dependencies {
     kapt("com.google.dagger:dagger-compiler:2.50")
     //Google auth dependency
     implementation("com.google.android.gms:play-services-auth:21.0.0")
+    //bar code scanner
+    implementation ("com.google.android.gms:play-services-code-scanner:16.0.0-beta3")
 }
