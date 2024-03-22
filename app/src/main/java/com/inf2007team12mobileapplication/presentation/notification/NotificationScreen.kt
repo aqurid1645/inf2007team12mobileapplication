@@ -1,7 +1,8 @@
-package com.inf2007team12mobileapplication.presentation
+package com.inf2007team12mobileapplication.presentation.notification
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api

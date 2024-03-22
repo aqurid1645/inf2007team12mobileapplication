@@ -1,6 +1,5 @@
-package com.inf2007team12mobileapplication.presentation
+package com.inf2007team12mobileapplication.presentation.homepage
 
-import com.inf2007team12mobileapplication.R
 import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -21,6 +20,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.inf2007team12mobileapplication.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -57,7 +57,11 @@ fun HomePageScreen() {
             Spacer(modifier = Modifier.height(16.dp))
 
             // Buttons for different actions
-
+            ActionButton(Icons.Default.CameraAlt, "Scan resource")
+            ActionButton(Icons.Default.ReportProblem, "Report a defect")
+            ActionButton(Icons.Default.AccessTime, "Extend a loan")
+            ActionButton(Icons.Default.Search, "Search for a resource")
+            ActionButton(Icons.Default.List, "Items borrowed")
         }
     }
 }

@@ -1,4 +1,4 @@
-package com.inf2007team12mobileapplication.presentation
+package com.inf2007team12mobileapplication.presentation.loan
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button

@@ -1,4 +1,4 @@
-package com.inf2007team12mobileapplication.presentation
+package com.inf2007team12mobileapplication.presentation.studentrecord
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons

@@ -1,4 +1,4 @@
-package com.inf2007team12mobileapplication.presentation
+package com.inf2007team12mobileapplication.presentation.report
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
