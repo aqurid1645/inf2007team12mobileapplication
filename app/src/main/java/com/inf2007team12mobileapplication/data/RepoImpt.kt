@@ -12,10 +12,13 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
+import com.google.firebase.firestore.FirebaseFirestore
+import com.inf2007team12mobileapplication.presentation.profile.UserProfile
 
 class RepoImpt@Inject constructor(
     private val firebaseAuth: FirebaseAuth,
     private val scanner: GmsBarcodeScanner,
+    private val firestore: FirebaseFirestore
 ) : Repo {
 
 
@@ -59,6 +62,8 @@ class RepoImpt@Inject constructor(
         }
 
     }
+
+
     private fun getDetails(barcode: Barcode): String {
         return when (barcode.valueType) {
             Barcode.TYPE_WIFI -> {

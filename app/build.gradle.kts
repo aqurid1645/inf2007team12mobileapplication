@@ -67,6 +67,7 @@ dependencies {
     implementation("androidx.compose.material:material:1.6.4")
     implementation("androidx.compose.material:material-icons-core:1.6.4")
     implementation("androidx.compose.material:material-icons-extended:1.6.4")
+    implementation("com.google.firebase:firebase-firestore-ktx:24.11.0")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
@@ -83,4 +84,17 @@ dependencies {
     implementation("com.google.android.gms:play-services-auth:21.0.0")
     //bar code scanner
     implementation ("com.google.android.gms:play-services-code-scanner:16.0.0-beta3")
+    implementation("androidx.compose.runtime:runtime-livedata:1.6.0")
+
+    //Google auth dependency
+    implementation("com.google.android.gms:play-services-auth:21.0.0")
+
+    // Import the BoM for the Firebase platform
+    implementation(platform("com.google.firebase:firebase-bom:32.7.4"))
+
+    // Declare the dependency for the Cloud Firestore library
+    // When using the BoM, you don't specify versions in Firebase library dependencies
+    implementation("com.google.firebase:firebase-firestore")
+
+
 }
