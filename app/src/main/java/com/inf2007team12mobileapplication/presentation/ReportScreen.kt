@@ -1,4 +1,4 @@
-package com.example.project
+package com.inf2007team12mobileapplication.presentation
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.*

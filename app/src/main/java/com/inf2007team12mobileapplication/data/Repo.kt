@@ -7,4 +7,5 @@ interface Repo {
     fun registerUser(email:String,password: String):Flow<Resource<AuthResult>>
     fun getuseremail():String?
     fun signout()
+    fun startScanning(): Flow<String?>
 }

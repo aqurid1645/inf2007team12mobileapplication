@@ -1,7 +1,6 @@
-package com.example.project
+package com.inf2007team12mobileapplication.presentation
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Divider
