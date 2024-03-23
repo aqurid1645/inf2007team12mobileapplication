@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
+import com.inf2007team12mobileapplication.data.model.UserProfile
 import kotlinx.coroutines.launch
 
 

@@ -1,4 +1,4 @@
-package com.inf2007team12mobileapplication.presentation.profile
+package com.inf2007team12mobileapplication.data.model
 
 
 data class UserProfile(
