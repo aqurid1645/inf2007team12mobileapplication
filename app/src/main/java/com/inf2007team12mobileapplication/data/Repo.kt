@@ -5,6 +5,8 @@ import kotlinx.coroutines.flow.Flow
 interface Repo {
     fun loginUser(email:String,password:String):Flow<Resource<AuthResult>>
     fun registerUser(email:String,password: String):Flow<Resource<AuthResult>>
+    fun registerUserWithRole(email: String, password: String, role: String): Flow<Resource<AuthResult>>
+
     fun getuseremail():String?
     fun signout()
     fun startScanning(): Flow<String?>

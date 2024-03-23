@@ -2,6 +2,7 @@ package com.inf2007team12mobileapplication.data
 
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.codescanner.GmsBarcodeScanner
 import kotlinx.coroutines.channels.awaitClose
@@ -12,8 +13,6 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
-import com.google.firebase.firestore.FirebaseFirestore
-import com.inf2007team12mobileapplication.presentation.profile.UserProfile
 
 class RepoImpt@Inject constructor(
     private val firebaseAuth: FirebaseAuth,
@@ -61,6 +60,33 @@ class RepoImpt@Inject constructor(
             awaitClose { }
         }
 
+    }
+
+    override fun registerUserWithRole(email: String, password: String, role: String): Flow<Resource<AuthResult>> {
+        return flow {
+            // Validate email format
+            if (!email.endsWith("@sit.edu.sg") && !email.endsWith("@sit.university.edu.sg")) {
+                emit(Resource.Error("Please follow the email format: @sit.edu.sg or @sit.university.edu.sg"))
+                return@flow // Early return if email format is incorrect
+            }
+
+            emit(Resource.Loading())
+            try {
+                val result = firebaseAuth.createUserWithEmailAndPassword(email, password).await()
+
+                // Determine the role based on the email domain, you might not need the 'role' parameter anymore.
+                val isLecturer = email.endsWith("@sit.university.edu.sg")
+                val determinedRole = if (isLecturer) "lecturer" else "student"
+
+                val userProfile = mapOf("role" to determinedRole)
+                firestore.collection("users").document(result.user!!.uid)
+                    .set(userProfile).await()
+
+                emit(Resource.Success(result))
+            } catch (e: Exception) {
+                emit(Resource.Error(e.message ?: "An unknown error occurred"))
+            }
+        }
     }
 
 

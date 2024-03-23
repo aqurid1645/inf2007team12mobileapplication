@@ -21,7 +21,6 @@ class SignUpViewModel @Inject constructor(
     val _signUpState  = Channel<SignInState>()
     val signUpState  = _signUpState.receiveAsFlow()
 
-
     fun registerUser(email:String, password:String) = viewModelScope.launch {
         repository.registerUser(email, password).collect{result ->
             when(result){
@@ -37,6 +36,22 @@ class SignUpViewModel @Inject constructor(
                 }
             }
 
+        }
+    }
+    fun registerUserwithrole(email: String, password: String) = viewModelScope.launch {
+        val role = if (email.contains("@sit.edu.sg")) "student" else "lecturer" // Simplified role determination logic
+        repository.registerUserWithRole(email, password, role).collect { result ->
+            when (result) {
+                is Resource.Success -> {
+                    _signUpState.send(SignInState(isSuccess = "Sign Up Success "))
+                }
+                is Resource.Loading -> {
+                    _signUpState.send(SignInState(isLoading = true))
+                }
+                is Resource.Error -> {
+                    _signUpState.send(SignInState(isError = result.message))
+                }
+            }
         }
     }
 
