@@ -1,14 +1,11 @@
-package com.inf2007team12mobileapplication.presentation.login
+package com.inf2007team12mobileapplication.presentation.biometric
 
 import android.content.Context
-import android.net.wifi.hotspot2.pps.Credential
+import android.net.wifi.hotspot2.pps.Credential.UserCredential
 import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -20,7 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -43,56 +39,30 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.common.api.ApiException
 import com.google.gson.Gson
 import com.inf2007team12mobileapplication.BiometricPromptUtils
 import com.inf2007team12mobileapplication.CIPHERTEXT_WRAPPER
 import com.inf2007team12mobileapplication.CryptographyManager
 import com.inf2007team12mobileapplication.SECRET_KEY_NAME
 import com.inf2007team12mobileapplication.SHARED_PREFS_FILENAME
+import com.inf2007team12mobileapplication.presentation.login.SignInViewModel
 import kotlinx.coroutines.launch
 
 
-private lateinit var biometricPrompt: BiometricPrompt
-private val cryptographyManager = CryptographyManager()
-private lateinit var userCredential: Credential.UserCredential
-private lateinit var context: Context
-private val ciphertextWrapper
-    get() = cryptographyManager.getCiphertextWrapperFromSharedPrefs(
-        context,
-        SHARED_PREFS_FILENAME,
-        Context.MODE_PRIVATE,
-        CIPHERTEXT_WRAPPER
-    )
-
+private lateinit var cryptographyManager: CryptographyManager
+private lateinit var userCredential: UserCredential
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SignInScreen(
+fun EnableBiometricScreen(
     navController: NavController,
     activity: AppCompatActivity,
     viewModel: SignInViewModel = hiltViewModel()
 ) {
-
-    val launcher =
-        rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) {
-            val account = GoogleSignIn.getSignedInAccountFromIntent(it.data)
-            try {
-                val result = account.getResult(ApiException::class.java)
-
-            } catch (it: ApiException) {
-                print(it)
-            }
-        }
-
-
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
     val scope = rememberCoroutineScope()
-    context = LocalContext.current
+    val context = LocalContext.current
     val state = viewModel.signInState.collectAsState(initial = null)
-    val canAuthenticate = BiometricManager.from(context).canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS
-    //val canAuthenticate = true
 
     Column(
         modifier = Modifier
@@ -101,13 +71,13 @@ fun SignInScreen(
         verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally
     ) { Text(
         modifier = Modifier.padding(bottom = 10.dp),
-        text = "Sign In",
+        text = "Enable Biometric Login",
         fontWeight = FontWeight.Bold,
         fontSize = 35.sp,
 
         )
         Text(
-            text = "Enter your credential's to sign in",
+            text = "Enter your login ID and password to confirm activation of Biometric Login",
             fontWeight = FontWeight.Medium,
             fontSize = 15.sp,
             color = Color.Gray,
@@ -145,58 +115,40 @@ fun SignInScreen(
             }
         )
 
-        Button(
-            onClick = {
-                scope.launch {
-                    viewModel.loginUser(email, password)
-                }
-            },
+        Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 20.dp, start = 30.dp, end = 30.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Black, contentColor = Color.White
-            ),
-            shape = RoundedCornerShape(15.dp)
+                .fillMaxSize(),
         ) {
-            Text(text = "Sign In", color = Color.White, modifier = Modifier.padding(7.dp))
-        }
-        if(canAuthenticate) Text(
-            modifier = Modifier
-                .padding(15.dp)
-                .clickable {
-                    if (ciphertextWrapper != null) {
-                        showBiometricPromptForDecryption(activity)
-                        scope.launch {
-                            viewModel.loginUser(userCredential.username, userCredential.password)
-                        }
-                    }else {
-                        navController.navigate("enablebiometric")
-                    }
+            Button(
+                onClick = {
+                    navController.navigate("signin")
                 },
-            text = "Sign In With Biometrics ",
-            fontWeight = FontWeight.Bold,
-            color = Color.Blue,
-            fontFamily = FontFamily.Default,
-        ) else null
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-            if (state.value?.isLoading == true) {
-                CircularProgressIndicator()
+                modifier = Modifier
+                    .padding(top = 20.dp, start = 15.dp, end = 15.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Black, contentColor = Color.White
+                ),
+                shape = RoundedCornerShape(15.dp)
+            ) {
+                Text(text = "CANCEL", color = Color.White, modifier = Modifier.padding(7.dp))
             }
 
-        }
-        Text(
-            modifier = Modifier
-                .padding(15.dp)
-                .clickable {
-                    navController.navigate("signup")
-
+            Button(
+                onClick = {
+                    scope.launch {
+                        viewModel.loginUser(email, password)
+                    }
                 },
-            text = "New User? Sign Up ",
-            fontWeight = FontWeight.Bold,
-            color = Color.Black,
-            fontFamily = FontFamily.Default
-        )
+                modifier = Modifier
+                    .padding(top = 20.dp, start = 15.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Black, contentColor = Color.White
+                ),
+                shape = RoundedCornerShape(15.dp)
+            ) {
+                Text(text = "AUTHORIZE", color = Color.White, modifier = Modifier.padding(7.dp))
+            }
+        }
     }
 
     LaunchedEffect(key1 = state.value?.isSuccess) {
@@ -204,8 +156,11 @@ fun SignInScreen(
             if (state.value?.isSuccess?.isNotEmpty() == true) {
                 val success = state.value?.isSuccess
                 Toast.makeText(context, "$success", Toast.LENGTH_LONG).show()
-                navController.navigate("profile")
-
+                userCredential = UserCredential()
+                userCredential.username = email
+                userCredential.password = password
+                showBiometricPromptForEncryption(activity)
+                navController.navigate("signin")
             }
         }
     }
@@ -219,29 +174,32 @@ fun SignInScreen(
     }
 }
 
-private fun showBiometricPromptForDecryption(activity: AppCompatActivity) {
-    ciphertextWrapper?.let { textWrapper ->
-        val cipher = cryptographyManager.getInitializedCipherForDecryption(
-            SECRET_KEY_NAME, textWrapper.initializationVector
-        )
-        biometricPrompt =
-            BiometricPromptUtils.createBiometricPrompt(
-                activity,
-                ::decryptServerTokenFromStorage
-            )
+private fun showBiometricPromptForEncryption(activity: AppCompatActivity) {
+    val canAuthenticate = BiometricManager.from(activity.applicationContext).canAuthenticate()
+    if (canAuthenticate == BiometricManager.BIOMETRIC_SUCCESS) {
+        cryptographyManager = CryptographyManager()
+        val cipher = cryptographyManager.getInitializedCipherForEncryption(SECRET_KEY_NAME)
+        val biometricPrompt =
+            BiometricPromptUtils.createBiometricPrompt(activity, ::encryptAndStoreUserCredentials)
         val promptInfo = BiometricPromptUtils.createPromptInfo(activity)
         biometricPrompt.authenticate(promptInfo, BiometricPrompt.CryptoObject(cipher))
     }
 }
 
-private fun decryptServerTokenFromStorage(activity: AppCompatActivity, authResult: BiometricPrompt.AuthenticationResult) {
-    ciphertextWrapper?.let { textWrapper ->
-        authResult.cryptoObject?.cipher?.let {
-            val plaintext =
-                cryptographyManager.decryptData(textWrapper.ciphertext, it)
-            val gson = Gson()
 
-            userCredential = gson.fromJson(plaintext, Credential.UserCredential::class.java)
+private fun encryptAndStoreUserCredentials(activity: AppCompatActivity, authResult: BiometricPrompt.AuthenticationResult) {
+    authResult.cryptoObject?.cipher?.apply {
+        userCredential?.let { userCredential ->
+            val gson = Gson()
+            val encryptedServerTokenWrapper = cryptographyManager.encryptData(gson.toJson(userCredential), this)
+            cryptographyManager.persistCiphertextWrapperToSharedPrefs(
+                encryptedServerTokenWrapper,
+                activity.applicationContext,
+                SHARED_PREFS_FILENAME,
+                Context.MODE_PRIVATE,
+                CIPHERTEXT_WRAPPER
+            )
         }
     }
+    activity.finish()
 }
