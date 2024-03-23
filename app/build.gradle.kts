@@ -68,6 +68,7 @@ dependencies {
     implementation("androidx.compose.material:material-icons-core:1.6.4")
     implementation("androidx.compose.material:material-icons-extended:1.6.4")
     implementation("com.google.firebase:firebase-firestore-ktx:24.11.0")
+    implementation("androidx.room:room-common:2.6.1")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
@@ -95,6 +96,14 @@ dependencies {
     // Declare the dependency for the Cloud Firestore library
     // When using the BoM, you don't specify versions in Firebase library dependencies
     implementation("com.google.firebase:firebase-firestore")
+
+
+    // Room components
+
+    implementation ("androidx.room:room-runtime:2.6.1")
+    annotationProcessor ("androidx.room:room-compiler:2.6.1")
+    // To use Kotlin annotation processing tool (kapt)
+    kapt ("androidx.room:room-compiler:2.6.1")
 
 
 }
