@@ -153,29 +153,13 @@ fun SignInScreen(
             fontFamily = FontFamily.Default
         )
     }
-    /*LaunchedEffect(key1 = state.value?.isSuccess) {
-        scope.launch {
-            if (state.value?.isSuccess?.isNotEmpty() == true) {
-                val currentUser = FirebaseAuth.getInstance().currentUser
-                if (currentUser != null) {
-                    val userId = currentUser.uid
-                    viewModel.checkUserProfileExists(userId) { exists ->
-                        if (exists) {
-                            navController.navigate("createprofile")
-                        } else {
-                            navController.navigate("signin")
-                        }
-                    }
-                }
-            }
-        }
-    }*/
+
     LaunchedEffect(key1 = state.value?.isSuccess) {
         scope.launch {
             if (state.value?.isSuccess?.isNotEmpty() == true) {
                 val success = state.value?.isSuccess
                 Toast.makeText(context, "$success", Toast.LENGTH_LONG).show()
-                navController.navigate("createprofile")
+                navController.navigate("profile")
 
             }
         }

@@ -9,7 +9,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.inf2007team12mobileapplication.presentation.camera.CameraScreen
 import com.inf2007team12mobileapplication.presentation.login.SignInScreen
-import com.inf2007team12mobileapplication.presentation.profile.CreateProfileScreen
+import com.inf2007team12mobileapplication.presentation.profile.ChangePasswordScreen
+import com.inf2007team12mobileapplication.presentation.profile.ProfileScreen
 import com.inf2007team12mobileapplication.presentation.signup.SignUpScreen
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -33,17 +34,17 @@ class MainActivity : ComponentActivity() {
                 composable("signin") {
                     SignInScreen(navController=navController)
                 }
-                /*composable("profile") {
+                composable("profile") {
                     ProfileScreen(navController = navController)
-                }*/
-                composable("createprofile") {
-                    CreateProfileScreen(navController = navController)
                 }
+              /*  composable("createprofile") {
+                    CreateProfileScreen(navController = navController)
+                }*/
                 composable("camera") {
                     CameraScreen(navController = navController)
                 }
                 composable("resetpassword") {
-                    CameraScreen(navController = navController)
+                    ChangePasswordScreen(navController = navController)
                 }
 
             }
