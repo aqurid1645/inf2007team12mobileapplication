@@ -115,7 +115,7 @@ class RepoImpt@Inject constructor(
             }
 
             Barcode.TYPE_PRODUCT -> {
-                "productType : ${barcode.displayValue}"
+                "productID : ${barcode.displayValue}"
             }
 
             Barcode.TYPE_EMAIL -> {
@@ -167,26 +167,45 @@ class RepoImpt@Inject constructor(
     override fun checkAndUpdateProductStatus(productId: String): Flow<Resource<Boolean>> = flow {
         emit(Resource.Loading())
 
-        val productRef = firestore.collection("products").document(productId)
-        val snapshot = productRef.get().await()
+        // Assuming 'products' collection has documents with a 'productBarcodeID' that should match the scannedBarcodeId
+        val querySnapshot = firestore.collection("products")
+            .whereEqualTo("productBarcodeID", productId)
+            .get()
+            .await()
 
-        val product = snapshot.toObject(Product::class.java)
-        if (product == null) {
+        // Check if the query returned any documents
+        if (querySnapshot.documents.isEmpty()) {
             emit(Resource.Error("Product does not exist."))
             return@flow
         }
 
-        if (product.status == "loaned") {
-            emit(Resource.Error("Product has already been borrowed."))
-            return@flow
-        }
+        val documentSnapshot = querySnapshot.documents.first()
+        val product = documentSnapshot.toObject(Product::class.java)
 
-        // Assuming we want to update the status to "loaned" once it's borrowed
-        productRef.update("status", "loaned").await()
-        emit(Resource.Success(true))
+        product?.let {
+            when (it.status) {
+                "loaned" -> {
+                    emit(Resource.Error("Product has already been borrowed."))
+                }
+                "reserved" -> {
+                    emit(Resource.Error("Product is reserved and cannot be borrowed at this time."))
+                }
+                "available" -> {
+                    // Update the status to "loaned" if the product is currently available
+                    firestore.collection("products").document(documentSnapshot.id)
+                        .update("status", "loaned").await()
+                    emit(Resource.Success(true))
+                }
+                else -> {
+                    emit(Resource.Error("Unhandled product status."))
+                }
+            }
+        } ?: emit(Resource.Error("Error retrieving product information."))
     }.catch { e ->
         emit(Resource.Error(e.message ?: "An unknown error occurred"))
     }
+
+
     // Function to check resource availability
     override fun checkResourceAvailability(): Flow<Resource<List<Product>>> = flow {
         emit(Resource.Loading())

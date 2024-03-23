@@ -7,5 +7,5 @@ data class Product(
     val description: String = "",
     val category: String = "",
     val status: String = "",
-    val barcode: String = ""
+    val productbarcodeID: String = ""
 )
