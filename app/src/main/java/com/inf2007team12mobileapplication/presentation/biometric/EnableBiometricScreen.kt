@@ -193,6 +193,7 @@ private fun encryptAndStoreUserCredentials(authResult: BiometricPrompt.Authentic
                 Context.MODE_PRIVATE,
                 CIPHERTEXT_WRAPPER
             )
+            AppUser.credential = null
         }
     }
 }

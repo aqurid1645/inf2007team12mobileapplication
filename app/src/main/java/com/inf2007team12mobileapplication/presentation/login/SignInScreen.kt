@@ -60,6 +60,8 @@ private val ciphertextWrapper
         CIPHERTEXT_WRAPPER
     )
 
+private lateinit var initiateLogin : (String, String) -> Unit
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignInScreen(
@@ -85,6 +87,14 @@ fun SignInScreen(
     val scope = rememberCoroutineScope()
     context = LocalContext.current
     val state = viewModel.signInState.collectAsState(initial = null)
+    var test by rememberSaveable { mutableStateOf(false) }
+    initiateLogin = {
+        _username, _password ->
+        scope.launch {
+            viewModel.loginUser(_username, _password)
+        }
+    }
+
 
     Column(
         modifier = Modifier
@@ -139,9 +149,7 @@ fun SignInScreen(
 
         Button(
             onClick = {
-                scope.launch {
-                    viewModel.loginUser(email, password)
-                }
+                initiateLogin(email, password)
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -158,15 +166,8 @@ fun SignInScreen(
                 .padding(15.dp)
                 .clickable {
                     if (ciphertextWrapper != null) {
+                        AppUser.credential = null
                         showBiometricPromptForDecryption(biometricAuthenticator)
-                        AppUser.credential?.let {
-                            scope.launch {
-                                viewModel.loginUser(
-                                    it.username,
-                                    it.password
-                                )
-                            }
-                        }
                     }else {
                         navController.navigate("enablebiometric")
                     }
@@ -229,11 +230,15 @@ private fun showBiometricPromptForDecryption(biometricAuthenticator: BiometricAu
 
 private fun decryptServerTokenFromStorage(authResult: BiometricPrompt.AuthenticationResult) {
     ciphertextWrapper?.let { textWrapper ->
-        authResult.cryptoObject?.cipher?.let {
+        authResult.cryptoObject?.cipher?.let {cipher->
             val plaintext =
-                cryptographyManager.decryptData(textWrapper.ciphertext, it)
+                cryptographyManager.decryptData(textWrapper.ciphertext, cipher)
             val gson = Gson()
             AppUser.credential = gson.fromJson(plaintext, AppUserCredential::class.java)
+            AppUser.credential?.let{ credential ->
+                initiateLogin(credential.username, credential.password)
+                AppUser.credential = null
+            }
         }
     }
 }
