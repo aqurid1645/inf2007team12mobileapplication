@@ -99,13 +99,12 @@ private class CryptographyManagerImpl : CryptographyManager {
             setBlockModes(ENCRYPTION_BLOCK_MODE)
             setEncryptionPaddings(ENCRYPTION_PADDING)
             setKeySize(KEY_SIZE)
-            setUserAuthenticationRequired(true)
+            //setUserAuthenticationRequired(true)
         }
 
         val keyGenParams = paramsBuilder.build()
         val keyGenerator = KeyGenerator.getInstance(
-            KeyProperties.KEY_ALGORITHM_AES,
-            ANDROID_KEYSTORE
+            KeyProperties.KEY_ALGORITHM_AES
         )
         keyGenerator.init(keyGenParams)
         return keyGenerator.generateKey()

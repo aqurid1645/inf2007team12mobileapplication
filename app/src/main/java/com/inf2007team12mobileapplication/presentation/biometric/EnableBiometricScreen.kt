@@ -1,10 +1,7 @@
 package com.inf2007team12mobileapplication.presentation.biometric
 
 import android.content.Context
-import android.net.wifi.hotspot2.pps.Credential.UserCredential
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
-import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -40,28 +37,28 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.google.gson.Gson
-import com.inf2007team12mobileapplication.BiometricPromptUtils
 import com.inf2007team12mobileapplication.CIPHERTEXT_WRAPPER
 import com.inf2007team12mobileapplication.CryptographyManager
 import com.inf2007team12mobileapplication.SECRET_KEY_NAME
 import com.inf2007team12mobileapplication.SHARED_PREFS_FILENAME
+import com.inf2007team12mobileapplication.presentation.login.AppUser
+import com.inf2007team12mobileapplication.presentation.login.AppUserCredential
 import com.inf2007team12mobileapplication.presentation.login.SignInViewModel
 import kotlinx.coroutines.launch
 
+private lateinit var context: Context
 
-private lateinit var cryptographyManager: CryptographyManager
-private lateinit var userCredential: UserCredential
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EnableBiometricScreen(
     navController: NavController,
-    activity: AppCompatActivity,
+    biometricAuthenticator: BiometricAuthenticator,
     viewModel: SignInViewModel = hiltViewModel()
 ) {
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
+    context = LocalContext.current
     val state = viewModel.signInState.collectAsState(initial = null)
 
     Column(
@@ -154,12 +151,10 @@ fun EnableBiometricScreen(
     LaunchedEffect(key1 = state.value?.isSuccess) {
         scope.launch {
             if (state.value?.isSuccess?.isNotEmpty() == true) {
+                AppUser.credential = AppUserCredential(username=email, password=password)
+                showBiometricPromptForEncryption(biometricAuthenticator)
                 val success = state.value?.isSuccess
                 Toast.makeText(context, "$success", Toast.LENGTH_LONG).show()
-                userCredential = UserCredential()
-                userCredential.username = email
-                userCredential.password = password
-                showBiometricPromptForEncryption(activity)
                 navController.navigate("signin")
             }
         }
@@ -174,32 +169,30 @@ fun EnableBiometricScreen(
     }
 }
 
-private fun showBiometricPromptForEncryption(activity: AppCompatActivity) {
-    val canAuthenticate = BiometricManager.from(activity.applicationContext).canAuthenticate()
-    if (canAuthenticate == BiometricManager.BIOMETRIC_SUCCESS) {
+private lateinit var cryptographyManager: CryptographyManager
+private fun showBiometricPromptForEncryption(biometricAuthenticator: BiometricAuthenticator) {
+    if (biometricAuthenticator.canAuthenticate()) {
         cryptographyManager = CryptographyManager()
         val cipher = cryptographyManager.getInitializedCipherForEncryption(SECRET_KEY_NAME)
         val biometricPrompt =
-            BiometricPromptUtils.createBiometricPrompt(activity, ::encryptAndStoreUserCredentials)
-        val promptInfo = BiometricPromptUtils.createPromptInfo(activity)
+            biometricAuthenticator.createBiometricPrompt(::encryptAndStoreUserCredentials)
+        val promptInfo = biometricAuthenticator.createPromptInfo()
         biometricPrompt.authenticate(promptInfo, BiometricPrompt.CryptoObject(cipher))
     }
 }
 
-
-private fun encryptAndStoreUserCredentials(activity: AppCompatActivity, authResult: BiometricPrompt.AuthenticationResult) {
+private fun encryptAndStoreUserCredentials(authResult: BiometricPrompt.AuthenticationResult) {
     authResult.cryptoObject?.cipher?.apply {
-        userCredential?.let { userCredential ->
+        AppUser.credential?.let {
             val gson = Gson()
-            val encryptedServerTokenWrapper = cryptographyManager.encryptData(gson.toJson(userCredential), this)
+            val encryptedServerTokenWrapper = cryptographyManager.encryptData(gson.toJson(it), this)
             cryptographyManager.persistCiphertextWrapperToSharedPrefs(
                 encryptedServerTokenWrapper,
-                activity.applicationContext,
+                context,
                 SHARED_PREFS_FILENAME,
                 Context.MODE_PRIVATE,
                 CIPHERTEXT_WRAPPER
             )
         }
     }
-    activity.finish()
 }

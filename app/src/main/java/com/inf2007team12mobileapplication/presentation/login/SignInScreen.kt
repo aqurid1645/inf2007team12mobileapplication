@@ -1,12 +1,9 @@
 package com.inf2007team12mobileapplication.presentation.login
 
 import android.content.Context
-import android.net.wifi.hotspot2.pps.Credential
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
-import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -46,17 +43,14 @@ import androidx.navigation.NavController
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
 import com.google.gson.Gson
-import com.inf2007team12mobileapplication.BiometricPromptUtils
 import com.inf2007team12mobileapplication.CIPHERTEXT_WRAPPER
 import com.inf2007team12mobileapplication.CryptographyManager
 import com.inf2007team12mobileapplication.SECRET_KEY_NAME
 import com.inf2007team12mobileapplication.SHARED_PREFS_FILENAME
+import com.inf2007team12mobileapplication.presentation.biometric.BiometricAuthenticator
 import kotlinx.coroutines.launch
 
-
-private lateinit var biometricPrompt: BiometricPrompt
 private val cryptographyManager = CryptographyManager()
-private lateinit var userCredential: Credential.UserCredential
 private lateinit var context: Context
 private val ciphertextWrapper
     get() = cryptographyManager.getCiphertextWrapperFromSharedPrefs(
@@ -70,7 +64,7 @@ private val ciphertextWrapper
 @Composable
 fun SignInScreen(
     navController: NavController,
-    activity: AppCompatActivity,
+    biometricAuthenticator: BiometricAuthenticator,
     viewModel: SignInViewModel = hiltViewModel()
 ) {
 
@@ -91,8 +85,6 @@ fun SignInScreen(
     val scope = rememberCoroutineScope()
     context = LocalContext.current
     val state = viewModel.signInState.collectAsState(initial = null)
-    val canAuthenticate = BiometricManager.from(context).canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS
-    //val canAuthenticate = true
 
     Column(
         modifier = Modifier
@@ -161,14 +153,19 @@ fun SignInScreen(
         ) {
             Text(text = "Sign In", color = Color.White, modifier = Modifier.padding(7.dp))
         }
-        if(canAuthenticate) Text(
+        if(biometricAuthenticator.canAuthenticate()) Text(
             modifier = Modifier
                 .padding(15.dp)
                 .clickable {
                     if (ciphertextWrapper != null) {
-                        showBiometricPromptForDecryption(activity)
-                        scope.launch {
-                            viewModel.loginUser(userCredential.username, userCredential.password)
+                        showBiometricPromptForDecryption(biometricAuthenticator)
+                        AppUser.credential?.let {
+                            scope.launch {
+                                viewModel.loginUser(
+                                    it.username,
+                                    it.password
+                                )
+                            }
                         }
                     }else {
                         navController.navigate("enablebiometric")
@@ -219,29 +216,28 @@ fun SignInScreen(
     }
 }
 
-private fun showBiometricPromptForDecryption(activity: AppCompatActivity) {
+private fun showBiometricPromptForDecryption(biometricAuthenticator: BiometricAuthenticator) {
     ciphertextWrapper?.let { textWrapper ->
         val cipher = cryptographyManager.getInitializedCipherForDecryption(
             SECRET_KEY_NAME, textWrapper.initializationVector
         )
-        biometricPrompt =
-            BiometricPromptUtils.createBiometricPrompt(
-                activity,
-                ::decryptServerTokenFromStorage
-            )
-        val promptInfo = BiometricPromptUtils.createPromptInfo(activity)
+        val biometricPrompt = biometricAuthenticator.createBiometricPrompt(::decryptServerTokenFromStorage)
+        val promptInfo = biometricAuthenticator.createPromptInfo()
         biometricPrompt.authenticate(promptInfo, BiometricPrompt.CryptoObject(cipher))
     }
 }
 
-private fun decryptServerTokenFromStorage(activity: AppCompatActivity, authResult: BiometricPrompt.AuthenticationResult) {
+private fun decryptServerTokenFromStorage(authResult: BiometricPrompt.AuthenticationResult) {
     ciphertextWrapper?.let { textWrapper ->
         authResult.cryptoObject?.cipher?.let {
             val plaintext =
                 cryptographyManager.decryptData(textWrapper.ciphertext, it)
             val gson = Gson()
-
-            userCredential = gson.fromJson(plaintext, Credential.UserCredential::class.java)
+            AppUser.credential = gson.fromJson(plaintext, AppUserCredential::class.java)
         }
     }
 }
+
+
+
+

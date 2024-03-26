@@ -86,7 +86,7 @@ dependencies {
 
     // Import for json parsing
     implementation("com.google.code.gson:gson:2.8.6")
-
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
     // Import for biometric
     implementation("androidx.biometric:biometric:1.0.1")
 }
