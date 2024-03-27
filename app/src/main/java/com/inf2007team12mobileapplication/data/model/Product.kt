@@ -2,10 +2,10 @@
 package com.inf2007team12mobileapplication.data.model
 
 data class Product(
-    val resourceId: String = "",
-    val name: String = "",
-    val description: String = "",
-    val category: String = "",
+     val productId: String = "",
+     val productName: String = "",
+    val productDescription: String = "",
+    val productCategory: String = "",
     val status: String = "",
-    val productbarcodeID: String = ""
+     val productBarcodeID: String = ""
 )

@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -14,6 +15,7 @@ import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
 @Database(entities = [Loan::class], version = 1, exportSchema = false)
+@TypeConverters(TimestampConverter::class)
 abstract class LoanRoomDatabase : RoomDatabase() {
     abstract fun loanDao(): LoanDao
 

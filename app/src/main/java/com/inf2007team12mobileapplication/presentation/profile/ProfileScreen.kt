@@ -132,6 +132,12 @@ fun ProfileScreen(navController: NavController, viewModel: ProfileScreenViewMode
             }) {
                 Text("Reset Password")
             }
+            Button(onClick = {
+                navController.navigate("report") {
+                }
+            }) {
+                Text("Report")
+            }
 
             Button(onClick = {
                 viewModel.signout()

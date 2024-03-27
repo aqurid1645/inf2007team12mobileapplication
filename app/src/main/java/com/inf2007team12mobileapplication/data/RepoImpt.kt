@@ -7,10 +7,12 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.codescanner.GmsBarcodeScanner
-import com.inf2007team12mobileapplication.data.model.DefectReport
 import com.inf2007team12mobileapplication.data.model.Loan
 import com.inf2007team12mobileapplication.data.model.Notification
 import com.inf2007team12mobileapplication.data.model.Product
+import com.inf2007team12mobileapplication.data.model.Report
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -18,7 +20,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import java.util.Date
+import java.util.Calendar
 import java.util.UUID
 import javax.inject.Inject
 
@@ -57,6 +59,7 @@ class RepoImpt@Inject constructor(
     override fun getCurrentUserId(): String {
         return FirebaseAuth.getInstance().currentUser?.uid ?: ""
     }
+
 
     override fun signout() {
         firebaseAuth.signOut()
@@ -172,20 +175,20 @@ class RepoImpt@Inject constructor(
         }
     }
 
-    override fun checkAndUpdateProductStatus(productId: String): Flow<Resource<Boolean>> = flow {
+    override fun checkAndUpdateProductStatus(productbarcodeId: String): Flow<Resource<Boolean>> = flow {
         emit(Resource.Loading())
 
 
-        val querySnapshot = firestore.collection("Product")
-            .whereEqualTo("productbarcodeID", productId)
+        val querySnapshot = firestore.collection("products")
+            .whereEqualTo("productBarcodeID", productbarcodeId)
             .get()
             .await()
-        Log.d("ProductStatus", "Loading started for product ID: $productId")
+        Log.d("ProductStatus", "Loading started for product ID: $productbarcodeId")
         Log.d("ProductStatus", "Query completed. Found ${querySnapshot.size()} documents.")
 
         // Check if the query returned any documents
         if (querySnapshot.documents.isEmpty()) {
-            Log.d("ProductStatus", "No documents found for productBarcodeID: $productId")
+            Log.d("ProductStatus", "No documents found for productBarcodeID: $productbarcodeId")
             emit(Resource.Error("Product does not exist."))
             return@flow
         }
@@ -198,7 +201,11 @@ class RepoImpt@Inject constructor(
             when (it.status) {
                 "loaned" -> {
                     Log.d("ProductStatusDebug", "Product has already been borrowed.")
-                    emit(Resource.Error("Product has already been borrowed."))
+                    val productName = documentSnapshot.getString("productName")
+                    Log.d("ProductData", "Product name: $productName")
+                    Log.d("ProductStatusDebug", "${it.status},${it.productId},${it.productBarcodeID},${it.productDescription}")
+
+                        emit(Resource.Error("Product has already been borrowed."))
                 }
                 "reserved" -> {
                     Log.d("ProductStatusDebug", "Product is reserved and cannot be borrowed at this time.")
@@ -207,16 +214,26 @@ class RepoImpt@Inject constructor(
                 "available" -> {
                     Log.d("ProductStatusDebug", "Attempting to update product status to loaned for document ID: ${documentSnapshot.id}")
                     // Update the status to "loaned" if the product is currently available
-                    firestore.collection("Product").document(documentSnapshot.id)
+                    firestore.collection("products").document(documentSnapshot.id)
                         .update("status", "loaned").await()
 
+
+                    val startDate = Calendar.getInstance().time
+                    val calendar = Calendar.getInstance()
+                    calendar.time = startDate
+                    calendar.add(Calendar.MONTH, 3) // Add 3 months to the start date
+                    val endDate = calendar.time
 
                     var newLoan = Loan(
                         loanId = UUID.randomUUID().toString(),
                         userId = getCurrentUserId(),
-                        resourceId = product.resourceId,
-                        startDate = Timestamp(Date()),
-                        endDate = Timestamp(Date()),
+                        productId = product.productId,
+                        productName = product.productName,
+                        productDescription = product.productDescription,
+                        productCategory = product.productCategory,
+                        productBarcodeID = product.productBarcodeID,
+                        startDate = Timestamp(startDate),
+                        endDate = Timestamp(endDate),
                         status = "active"
                     )
 
@@ -237,12 +254,67 @@ class RepoImpt@Inject constructor(
         emit(Resource.Error(e.message ?: "An unknown error occurred"))
     }
 
+  override fun <T : Any> writeToFirestore(collectionName: String, dataModel: T, documentId: String?) {
+        val firestoreInstance = FirebaseFirestore.getInstance()
+        val documentReference = if (documentId != null) {
+            firestoreInstance.collection(collectionName).document(documentId)
+        } else {
+            firestoreInstance.collection(collectionName).document()
+        }
+
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                documentReference.set(dataModel).await()
+                // Log success message
+                Log.d("FirestoreSuccess", "Document successfully written in $collectionName!")
+            } catch (e: Exception) {
+                // Log error message
+                Log.e("FirestoreError", "Error writing document to $collectionName: ${e.message}")
+            }
+        }
+    }
+    override fun <T : Any> writeToFirestoreflow(collectionName: String, dataModel: T, documentId: String?): Flow<Resource<Unit>> = flow {
+        emit(Resource.Loading())
+
+        try {
+            val firestoreInstance = FirebaseFirestore.getInstance()
+            val documentReference = if (documentId != null) {
+                firestoreInstance.collection(collectionName).document(documentId)
+            } else {
+                firestoreInstance.collection(collectionName).document()
+            }
+            documentReference.set(dataModel).await()
+            emit(Resource.Success(Unit)) // Emit success after the document is successfully written
+            Log.d("FirestoreSuccess", "Document successfully written in $collectionName!")
+        } catch (e: Exception) {
+            emit(Resource.Error(e.message ?: "An error occurred while creating the document."))
+            Log.e("FirestoreError", "Error writing document to $collectionName: ${e.message}")
+        }
+    }
+
+    override fun createLoan(loan: Loan) {
+        val firestoreInstance = FirebaseFirestore.getInstance()
+        val documentReference = firestoreInstance.collection("loans").document()
+
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                documentReference.set(loan).await()
+                // Log success message
+                Log.d("FirestoreSuccess", "Document successfully written!")
+            } catch (e: Exception) {
+                // Log error message
+                Log.e("FirestoreError", "Error writing document: ${e.message}")
+            }
+        }
+    }
+
+
 
     // Function to check resource availability
     override fun checkResourceAvailability(): Flow<Resource<List<Product>>> = flow {
         emit(Resource.Loading())
 
-        val snapshot = firestore.collection("Product")
+        val snapshot = firestore.collection("products")
             .whereEqualTo("status", "available")
             .get()
             .await()
@@ -254,18 +326,18 @@ class RepoImpt@Inject constructor(
     }
 
     // Function to initiate a new loan
-    override fun createLoan(loan: Loan): Flow<Resource<Unit>> = flow {
+ /*   override fun createLoan(loan: Loan): Flow<Resource<Unit>> = flow {
         emit(Resource.Loading())
 
-        firestore.collection("loans").document().set(loan)
+        val firestore = firestore.collection("loans").document().set(loan)
         emit(Resource.Success(Unit))
     }.catch { e ->
         emit(Resource.Error(e.message ?: "An error occurred while creating the loan."))
     }
-
+*/
 
     // Function to report a defective product
-    override fun reportDefectiveProduct(defectReport: DefectReport): Flow<Resource<Unit>> = flow {
+    override fun reportDefectiveProduct(defectReport: Report): Flow<Resource<Unit>> = flow {
         emit(Resource.Loading())
 
         firestore.collection("defectReports").add(defectReport).await()
