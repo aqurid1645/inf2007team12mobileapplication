@@ -51,7 +51,21 @@ fun CameraScreen(navController: NavController, viewModel: CameraScreenViewModel 
         Toast.makeText(context, state.errorMessage, Toast.LENGTH_LONG).show()
         viewModel.clearError() // Clear the error after showing it
     }
+
+    if (state.showLoanDetailsDialog && state.loanDetails != null) {
+        AlertDialog(
+            onDismissRequest = { viewModel.resetDialog() },
+            title = { Text(text = "Loan Details") },
+            text = { Text(text = state.loanDetails) },
+            confirmButton = {
+                Button(onClick = { viewModel.resetDialog() }) {
+                    Text("OK")
+                }
+            }
+        )
+    }
 }
+
 
 
 @Composable
@@ -69,6 +83,20 @@ fun BorrowConfirmationDialog(productId: String, onConfirm: () -> Unit, onDismiss
         dismissButton = {
             Button(onClick = onDismiss) {
                 Text("No")
+            }
+        }
+    )
+}
+
+@Composable
+fun LoanDetailsDialog(loanDetails: String, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Loan Details") },
+        text = { Text(loanDetails) },
+        confirmButton = {
+            Button(onClick = onDismiss) {
+                Text("OK")
             }
         }
     )

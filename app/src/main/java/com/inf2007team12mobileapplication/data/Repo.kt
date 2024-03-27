@@ -15,7 +15,7 @@ interface Repo {
     fun signout()
     fun startScanning(): Flow<String?>
     fun getCurrentUserId(): String
-    fun checkAndUpdateProductStatus(productId: String): Flow<Resource<Boolean>>
+    fun checkAndUpdateProductStatus(productId: String): Flow<Resource<String>>
     fun checkResourceAvailability(): Flow<Resource<List<Product>>>
     fun createLoan(loan: Loan)
     fun <T : Any> writeToFirestore(collectionName: String, dataModel: T, documentId: String?= null)

@@ -6,6 +6,9 @@ data class CameraScreenState(
     val scannedProductName: String? = null, // Add this line
     val showError: Boolean = false,
     val errorMessage: String = "",
-    val details: String = ""
+    val details: String = "",
+    val showLoanDetailsDialog: Boolean = false,
+    val loanDetails: String? = null
+
 )
 

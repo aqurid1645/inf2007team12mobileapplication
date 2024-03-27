@@ -48,7 +48,11 @@ class CameraScreenViewModel @Inject constructor(
                             updateStateForLoading("Checking product status...")
                         }
                         is Resource.Success -> {
-                            // Update UI for success
+                            val loanDetails = resource.data
+                            _state.value = _state.value.copy(
+                                showLoanDetailsDialog = true,
+                                loanDetails = loanDetails
+                            )
                             updateStateForSuccess("Product ID $productId borrowed successfully.")
                         }
                         is Resource.Error -> {
@@ -82,8 +86,14 @@ class CameraScreenViewModel @Inject constructor(
     }
 
     fun resetDialog() {
-        _state.value = _state.value.copy(showConfirmationDialog = false, scannedProductId = null)
+        _state.value = _state.value.copy(
+            showConfirmationDialog = false,
+            showLoanDetailsDialog = false,
+            loanDetails = null,
+            scannedProductId = null
+        )
     }
+
 
     fun clearError() {
         _state.value = _state.value.copy(showError = false, errorMessage = "")

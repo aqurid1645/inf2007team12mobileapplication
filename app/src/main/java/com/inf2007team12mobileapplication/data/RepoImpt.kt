@@ -175,7 +175,7 @@ class RepoImpt@Inject constructor(
         }
     }
 
-    override fun checkAndUpdateProductStatus(productbarcodeId: String): Flow<Resource<Boolean>> = flow {
+    override fun checkAndUpdateProductStatus(productbarcodeId: String): Flow<Resource<String>> = flow {
         emit(Resource.Loading())
 
 
@@ -241,7 +241,9 @@ class RepoImpt@Inject constructor(
 
                     // Log a success message after the loan is created
                     Log.d("CreateLoan", "Loan created successfully.")
-                    emit(Resource.Success(true))
+                    // Use the formatDetails method to format the loan details
+                    val loanDetails = newLoan.formatDetails()
+                    emit(Resource.Success(loanDetails))
                 }
                 else -> {
                     Log.d("ProductStatusDebug", "Unhandled product status: ${it.status}")
