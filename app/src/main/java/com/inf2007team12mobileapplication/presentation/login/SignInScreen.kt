@@ -1,76 +1,44 @@
 package com.inf2007team12mobileapplication.presentation.login
 
-import android.content.Context
-import android.net.wifi.hotspot2.pps.Credential
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
-import androidx.biometric.BiometricManager
-import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+
 import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
-import com.google.gson.Gson
-import com.inf2007team12mobileapplication.BiometricPromptUtils
-import com.inf2007team12mobileapplication.CIPHERTEXT_WRAPPER
-import com.inf2007team12mobileapplication.CryptographyManager
-import com.inf2007team12mobileapplication.SECRET_KEY_NAME
-import com.inf2007team12mobileapplication.SHARED_PREFS_FILENAME
+import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.launch
-
-
-private lateinit var biometricPrompt: BiometricPrompt
-private val cryptographyManager = CryptographyManager()
-private lateinit var userCredential: Credential.UserCredential
-private lateinit var context: Context
-private val ciphertextWrapper
-    get() = cryptographyManager.getCiphertextWrapperFromSharedPrefs(
-        context,
-        SHARED_PREFS_FILENAME,
-        Context.MODE_PRIVATE,
-        CIPHERTEXT_WRAPPER
-    )
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignInScreen(
     navController: NavController,
-    activity: AppCompatActivity,
     viewModel: SignInViewModel = hiltViewModel()
 ) {
 
@@ -89,10 +57,8 @@ fun SignInScreen(
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
     val scope = rememberCoroutineScope()
-    context = LocalContext.current
+    val context = LocalContext.current
     val state = viewModel.signInState.collectAsState(initial = null)
-    val canAuthenticate = BiometricManager.from(context).canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS
-    //val canAuthenticate = true
 
     Column(
         modifier = Modifier
@@ -161,24 +127,6 @@ fun SignInScreen(
         ) {
             Text(text = "Sign In", color = Color.White, modifier = Modifier.padding(7.dp))
         }
-        if(canAuthenticate) Text(
-            modifier = Modifier
-                .padding(15.dp)
-                .clickable {
-                    if (ciphertextWrapper != null) {
-                        showBiometricPromptForDecryption(activity)
-                        scope.launch {
-                            viewModel.loginUser(userCredential.username, userCredential.password)
-                        }
-                    }else {
-                        navController.navigate("enablebiometric")
-                    }
-                },
-            text = "Sign In With Biometrics ",
-            fontWeight = FontWeight.Bold,
-            color = Color.Blue,
-            fontFamily = FontFamily.Default,
-        ) else null
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
             if (state.value?.isLoading == true) {
                 CircularProgressIndicator()
@@ -198,7 +146,6 @@ fun SignInScreen(
             fontFamily = FontFamily.Default
         )
     }
-
     LaunchedEffect(key1 = state.value?.isSuccess) {
         scope.launch {
             if (state.value?.isSuccess?.isNotEmpty() == true) {
@@ -215,33 +162,6 @@ fun SignInScreen(
                 val error = state.value?.isError
                 Toast.makeText(context, "$error", Toast.LENGTH_LONG).show()
             }
-        }
-    }
-}
-
-private fun showBiometricPromptForDecryption(activity: AppCompatActivity) {
-    ciphertextWrapper?.let { textWrapper ->
-        val cipher = cryptographyManager.getInitializedCipherForDecryption(
-            SECRET_KEY_NAME, textWrapper.initializationVector
-        )
-        biometricPrompt =
-            BiometricPromptUtils.createBiometricPrompt(
-                activity,
-                ::decryptServerTokenFromStorage
-            )
-        val promptInfo = BiometricPromptUtils.createPromptInfo(activity)
-        biometricPrompt.authenticate(promptInfo, BiometricPrompt.CryptoObject(cipher))
-    }
-}
-
-private fun decryptServerTokenFromStorage(activity: AppCompatActivity, authResult: BiometricPrompt.AuthenticationResult) {
-    ciphertextWrapper?.let { textWrapper ->
-        authResult.cryptoObject?.cipher?.let {
-            val plaintext =
-                cryptographyManager.decryptData(textWrapper.ciphertext, it)
-            val gson = Gson()
-
-            userCredential = gson.fromJson(plaintext, Credential.UserCredential::class.java)
         }
     }
 }

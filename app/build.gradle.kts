@@ -83,10 +83,4 @@ dependencies {
     implementation("com.google.android.gms:play-services-auth:21.0.0")
     //bar code scanner
     implementation ("com.google.android.gms:play-services-code-scanner:16.0.0-beta3")
-
-    // Import for json parsing
-    implementation("com.google.code.gson:gson:2.8.6")
-
-    // Import for biometric
-    implementation("androidx.biometric:biometric:1.0.1")
 }
