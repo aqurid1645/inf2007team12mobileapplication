@@ -11,6 +11,7 @@ import com.inf2007team12mobileapplication.presentation.camera.CameraScreen
 import com.inf2007team12mobileapplication.presentation.login.SignInScreen
 import com.inf2007team12mobileapplication.presentation.profile.ChangePasswordScreen
 import com.inf2007team12mobileapplication.presentation.profile.ProfileScreen
+import com.inf2007team12mobileapplication.presentation.report.ReportScreen
 import com.inf2007team12mobileapplication.presentation.signup.SignUpScreen
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -47,10 +48,9 @@ class MainActivity : ComponentActivity() {
                     ChangePasswordScreen(navController = navController)
                 }
 
-               /* composable("report") {
+                composable("report") {
                    ReportScreen(navController = navController)
                 }
-*/
             }
         }
     }

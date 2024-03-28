@@ -18,6 +18,8 @@ interface Repo {
     fun checkAndUpdateProductStatus(productId: String): Flow<Resource<String>>
     fun checkResourceAvailability(): Flow<Resource<List<Product>>>
     fun createLoan(loan: Loan)
+
+    fun getUserLoans(userId: String): Flow<Resource<List<Loan>>>
     fun <T : Any> writeToFirestore(collectionName: String, dataModel: T, documentId: String?= null)
     fun <T : Any> writeToFirestoreflow(collectionName: String, dataModel: T, documentId: String? = null) : Flow<Resource<Unit>>
     fun reportDefectiveProduct(defectReport: Report): Flow<Resource<Unit>>

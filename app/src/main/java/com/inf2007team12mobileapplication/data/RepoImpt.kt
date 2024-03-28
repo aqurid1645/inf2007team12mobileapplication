@@ -310,6 +310,18 @@ class RepoImpt@Inject constructor(
         }
     }
 
+    override fun getUserLoans(userId: String): Flow<Resource<List<Loan>>> = flow {
+        try {
+            val loansSnapshot = firestore.collection("loans")
+                .whereEqualTo("userId", userId)
+                .get()
+                .await()
+            val loans = loansSnapshot.toObjects(Loan::class.java)
+            emit(Resource.Success(loans))
+        } catch (e: Exception) {
+            emit(Resource.Error("Failed to fetch loans: ${e.message}"))
+        }
+    }
 
 
     // Function to check resource availability
@@ -342,7 +354,7 @@ class RepoImpt@Inject constructor(
     override fun reportDefectiveProduct(defectReport: Report): Flow<Resource<Unit>> = flow {
         emit(Resource.Loading())
 
-        firestore.collection("defectReports").add(defectReport).await()
+        firestore.collection("reports").add(defectReport).await()
         emit(Resource.Success(Unit)) // Emit success with Unit value
     }.catch { e ->
         emit(Resource.Error(e.message ?: "An error occurred while reporting the defect."))
