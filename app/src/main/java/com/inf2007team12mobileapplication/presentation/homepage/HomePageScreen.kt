@@ -2,6 +2,7 @@ package com.inf2007team12mobileapplication.presentation.homepage
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -18,21 +19,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.inf2007team12mobileapplication.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun HomePageScreen() {
+fun HomePageScreen(navController: NavController, viewModel: HomePageViewModel = hiltViewModel()) {
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Resources Management", fontWeight = FontWeight.Bold) },
                 actions = {
-                    IconButton(onClick = { /* TODO: handle user profile click */ }) {
-                        Icon(Icons.Default.AccountCircle, contentDescription = "User Profile")
+                    IconButton(onClick = {
+
+                        navController.navigate("profile")
+                    }) {
+                        Icon(Icons.Default.AccountCircle, contentDescription = "User Profile", Modifier.size(20.dp))
                     }
                 }
             )
@@ -56,32 +61,36 @@ fun HomePageScreen() {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Buttons for different actions
-            ActionButton(Icons.Default.CameraAlt, "Scan resource")
-            ActionButton(Icons.Default.ReportProblem, "Report a defect")
-            ActionButton(Icons.Default.AccessTime, "Extend a loan")
-            ActionButton(Icons.Default.Search, "Search for a resource")
-            ActionButton(Icons.Default.List, "Items borrowed")
+
+            ActionButton(icon = Icons.Default.CameraAlt, text = "Scan resource") {
+                    navController.navigate("camera") // Replace with your correct route
+                }
+            ActionButton(icon = Icons.Default.ReportProblem, text = "Report a defect") {
+                navController.navigate("report") // Replace with your correct route
+            }
+            ActionButton(icon = Icons.Default.AccessTime, text = "Extend a loan") {
+                // Replace with your navigation action if you have one
+            }
+            ActionButton(icon = Icons.Default.Search, text = "Search for a resource") {
+                // Replace with your navigation action if you have one
+            }
+            ActionButton(icon = Icons.Default.List, text = "Items borrowed") {
+                // Replace with your navigation action if you have one
+            }
         }
     }
 }
 
 @Composable
-fun ActionButton(icon: ImageVector, text: String) {
+fun ActionButton(icon: ImageVector, text: String, onClick: () -> Unit) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
-        modifier = Modifier.padding(8.dp)
+        modifier = Modifier
+            .padding(8.dp)
+            .clickable(onClick = onClick) // Handle button click
     ) {
-        IconButton(onClick = { /* TODO: handle button click */ }) {
-            Icon(icon, contentDescription = text)
-        }
+        Icon(icon, contentDescription = text, modifier = Modifier.size(40.dp)) // Adjust icon size if desired
         Text(text)
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun HomePageScreenPreview() {
-    HomePageScreen()
 }

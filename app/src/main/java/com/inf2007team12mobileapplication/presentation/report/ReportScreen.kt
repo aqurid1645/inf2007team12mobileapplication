@@ -147,7 +147,6 @@ fun ReportScreen(navController: NavController, viewModel: ReportScreenViewModel 
     }
 }
 
-// Other composables remain the same
 
 @Composable
 fun ProblemTypeDropdownMenu(
