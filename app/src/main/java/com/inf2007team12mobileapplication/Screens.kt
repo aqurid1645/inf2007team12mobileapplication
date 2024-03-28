@@ -1,4 +1,4 @@
-package com.inf2007team12mobileapplication.presentation
+package com.inf2007team12mobileapplication
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CameraAlt
