@@ -31,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -44,6 +45,8 @@ import java.util.UUID
 fun ReportScreen(navController: NavController, viewModel: ReportScreenViewModel = hiltViewModel()) {
     val scaffoldState = rememberScaffoldState()
     val submissionStatus by viewModel.submissionStatus.collectAsState()
+    val keyboardController = LocalSoftwareKeyboardController.current
+
 
     LaunchedEffect(key1 = true) {
         viewModel.fetchUserLoans()
@@ -95,9 +98,11 @@ fun ReportScreen(navController: NavController, viewModel: ReportScreenViewModel 
             Button(
                 onClick = {
                     if (selectedLoan != null && problemType.isNotEmpty() && description.isNotEmpty()) {
+                        keyboardController?.hide()
                         val report = Report(
                             reportId = UUID.randomUUID().toString(),
                             userId = viewModel.getCurrentUserId(),
+                            loanId = selectedLoan!!.loanId,
                             productId = selectedLoan!!.productId,
                             description = description,
                             problemType = problemType,
@@ -133,7 +138,10 @@ fun ReportScreen(navController: NavController, viewModel: ReportScreenViewModel 
                 }
             }
             else -> {
-                // No action needed
+                LaunchedEffect(status) {
+                    scaffoldState.snackbarHostState.showSnackbar("Please try again: $${status.message}")
+                    viewModel.clearSubmissionStatus()
+                }
             }
         }
     }
@@ -147,7 +155,7 @@ fun ProblemTypeDropdownMenu(
     onProblemTypeSelected: (String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val problemTypes = listOf("Defect", "Hardware Issue", "Software Issue", "Other")
+    val problemTypes = listOf("Defects", "Hardware Issue", "Software Issue", "Others")
 
     Box(
         modifier = Modifier

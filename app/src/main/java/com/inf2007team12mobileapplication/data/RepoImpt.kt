@@ -354,11 +354,24 @@ class RepoImpt@Inject constructor(
     override fun reportDefectiveProduct(defectReport: Report): Flow<Resource<Unit>> = flow {
         emit(Resource.Loading())
 
-        firestore.collection("reports").add(defectReport).await()
-        emit(Resource.Success(Unit)) // Emit success with Unit value
+        // Check if a report for the given loanId already exists
+        val querySnapshot = firestore.collection("reports")
+            .whereEqualTo("loanId", defectReport.loanId)
+            .get()
+            .await()
+
+        if (querySnapshot.isEmpty) {
+            // No existing report found for the loanId, proceed with submitting the new report
+            firestore.collection("reports").add(defectReport).await()
+            emit(Resource.Success(Unit)) // Report submission successful
+        } else {
+            // Report for the given loanId already exists
+            emit(Resource.Error("A report for this loan has already been submitted."))
+        }
     }.catch { e ->
-        emit(Resource.Error(e.message ?: "An error occurred while reporting the defect."))
+        emit(Resource.Error(e.message ?: "An error occurred while attempting to report the defect."))
     }
+
     // Function to fetch notifications for a lecturer
     override fun fetchNotificationsForLecturer(lecturerId: String): Flow<Resource<List<Notification>>> = flow {
         emit(Resource.Loading())

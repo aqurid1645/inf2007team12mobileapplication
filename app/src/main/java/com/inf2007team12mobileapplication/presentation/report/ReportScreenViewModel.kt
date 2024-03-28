@@ -48,7 +48,8 @@ class ReportScreenViewModel @Inject constructor(
             when (resource) {
                 is Resource.Success -> _submissionStatus.value = Resource.Success("Report submitted successfully")
                 is Resource.Error -> _submissionStatus.value = Resource.Error(resource.message ?: "Error submitting report")
-                else -> {} // Optional: Handle loading state if necessary
+                else -> {   _submissionStatus.value = Resource.Loading(resource.message ?: "Not available at the moment")
+                 }
             }
             _reportStatus.value = resource
         }
