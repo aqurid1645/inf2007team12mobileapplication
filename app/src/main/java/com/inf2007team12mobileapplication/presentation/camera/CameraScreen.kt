@@ -30,7 +30,7 @@ fun CameraScreen(navController: NavController, viewModel: CameraScreenViewModel 
             Text(text = "Welcome ${viewModel.getuseremail() ?: "Guest"}")
             Spacer(modifier = Modifier.height(16.dp))
             Button(onClick = { viewModel.startScanning() }) {
-                Text(text = "Start Scanning")
+                Text(text = "Borrow")
             }
 
             // Check if there's a product ID available when showing the confirmation dialog

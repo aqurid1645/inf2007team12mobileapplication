@@ -23,14 +23,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-
 import com.inf2007team12mobileapplication.presentation.camera.CameraScreen
+import com.inf2007team12mobileapplication.presentation.catalog.ProductCatalogScreen
 import com.inf2007team12mobileapplication.presentation.homepage.HomePageScreen
-import com.inf2007team12mobileapplication.presentation.search.InventoryScreen
 import com.inf2007team12mobileapplication.presentation.login.SignInScreen
 import com.inf2007team12mobileapplication.presentation.profile.ChangePasswordScreen
 import com.inf2007team12mobileapplication.presentation.profile.ProfileScreen
 import com.inf2007team12mobileapplication.presentation.report.ReportScreen
+import com.inf2007team12mobileapplication.presentation.search.InventoryScreen
 import com.inf2007team12mobileapplication.presentation.signup.SignUpScreen
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -50,7 +50,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainScreen() {
     val navController = rememberNavController()
-    val screensWithIcons = listOf(Screen.Home, Screen.Camera, Screen.Report)
+    val screensWithIcons = listOf(Screen.Home, Screen.Camera, Screen.Report,Screen.ProductCatalog)
     val hideBottomBarRoutes = listOf(Screen.SignIn.route, Screen.SignUp.route) // Define routes where the bottom bar should be hidden
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
 
@@ -70,6 +70,7 @@ fun MainScreen() {
             composable(Screen.Report.route) { ReportScreen(navController) }
             composable(Screen.Home.route) { HomePageScreen(navController) }
             composable(Screen.Inventory.route) { InventoryScreen(navController) }
+            composable(Screen.ProductCatalog.route) { ProductCatalogScreen(navController)}
 
             // Define other composable screens here
         }

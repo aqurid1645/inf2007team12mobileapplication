@@ -6,6 +6,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.automirrored.filled.ViewList
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -74,8 +76,11 @@ fun HomePageScreen(navController: NavController, viewModel: HomePageViewModel = 
             ActionButton(icon = Icons.Default.Search, text = "Search for a resource") {
                 navController.navigate("inventory")
             }
-            ActionButton(icon = Icons.Default.List, text = "Items borrowed") {
+            ActionButton(icon = Icons.AutoMirrored.Filled.List, text = "Items borrowed") {
                 // Replace with your navigation action if you have one
+            }
+            ActionButton(icon = Icons.AutoMirrored.Filled.ViewList, text = "Product Catalog") {
+                navController.navigate("productcatalog")
             }
         }
     }

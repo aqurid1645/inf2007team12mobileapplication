@@ -1,6 +1,7 @@
 package com.inf2007team12mobileapplication
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ViewList
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Report
@@ -16,6 +17,8 @@ sealed class Screen(val route: String, val icon: ImageVector? = null) {
     object Report : Screen("report", Icons.Default.Report)
     object Home : Screen("home", Icons.Default.Home)
     object Inventory : Screen("inventory")
+
+    object ProductCatalog: Screen("productcatalog",Icons.AutoMirrored.Filled.ViewList)
 
 
 }
