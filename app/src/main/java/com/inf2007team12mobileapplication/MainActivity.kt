@@ -1,5 +1,6 @@
 package com.inf2007team12mobileapplication
 
+
 import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -22,9 +23,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.inf2007team12mobileapplication.presentation.Screen
+
 import com.inf2007team12mobileapplication.presentation.camera.CameraScreen
 import com.inf2007team12mobileapplication.presentation.homepage.HomePageScreen
+import com.inf2007team12mobileapplication.presentation.search.InventoryScreen
 import com.inf2007team12mobileapplication.presentation.login.SignInScreen
 import com.inf2007team12mobileapplication.presentation.profile.ChangePasswordScreen
 import com.inf2007team12mobileapplication.presentation.profile.ProfileScreen
@@ -67,6 +69,8 @@ fun MainScreen() {
             composable(Screen.ResetPassword.route) { ChangePasswordScreen(navController) }
             composable(Screen.Report.route) { ReportScreen(navController) }
             composable(Screen.Home.route) { HomePageScreen(navController) }
+            composable(Screen.Inventory.route) { InventoryScreen(navController) }
+
             // Define other composable screens here
         }
     }

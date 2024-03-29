@@ -6,6 +6,8 @@ import com.inf2007team12mobileapplication.data.model.Notification
 import com.inf2007team12mobileapplication.data.model.Product
 import com.inf2007team12mobileapplication.data.model.Report
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+
 interface Repo {
     fun loginUser(email:String,password:String):Flow<Resource<AuthResult>>
     fun registerUser(email:String,password: String):Flow<Resource<AuthResult>>
@@ -24,4 +26,5 @@ interface Repo {
     fun <T : Any> writeToFirestoreflow(collectionName: String, dataModel: T, documentId: String? = null) : Flow<Resource<Unit>>
     fun reportDefectiveProduct(defectReport: Report): Flow<Resource<Unit>>
     fun fetchNotificationsForLecturer(lecturerId: String): Flow<Resource<List<Notification>>>
+    fun fetchProduct(product:String): Flow<Resource<String>>
 }

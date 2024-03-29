@@ -15,5 +15,7 @@ sealed class Screen(val route: String, val icon: ImageVector? = null) {
     object ResetPassword : Screen("resetpassword")
     object Report : Screen("report", Icons.Default.Report)
     object Home : Screen("home", Icons.Default.Home)
+    object Inventory : Screen("inventory")
+
 
 }

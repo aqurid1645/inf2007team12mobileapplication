@@ -5,12 +5,14 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -46,7 +48,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun SignInScreen(
     navController: NavController,
-    viewModel: SignInViewModel = hiltViewModel()
+    viewModel: SignInViewModel = hiltViewModel(),
 ) {
 
     val launcher =
@@ -72,13 +74,14 @@ fun SignInScreen(
             .fillMaxSize()
             .padding(start = 30.dp, end = 30.dp),
         verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally
-    ) { Text(
-        modifier = Modifier.padding(bottom = 10.dp),
-        text = "Sign In",
-        fontWeight = FontWeight.Bold,
-        fontSize = 35.sp,
+    ) {
+        Text(
+            modifier = Modifier.padding(bottom = 10.dp),
+            text = "Sign In",
+            fontWeight = FontWeight.Bold,
+            fontSize = 35.sp,
 
-        )
+            )
         Text(
             text = "Enter your credential's to sign in",
             fontWeight = FontWeight.Medium,
@@ -91,7 +94,7 @@ fun SignInScreen(
             onValueChange = {
                 email = it
             },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().imePadding(),
             colors = TextFieldDefaults.textFieldColors(
                 containerColor = Color.LightGray,
                 cursorColor = Color.Black,
@@ -146,7 +149,8 @@ fun SignInScreen(
                 .clickable {
                     navController.navigate("signup")
 
-                },
+                }
+                .imePadding(),
             text = "New User? Sign Up ",
             fontWeight = FontWeight.Bold,
             color = Color.Black,

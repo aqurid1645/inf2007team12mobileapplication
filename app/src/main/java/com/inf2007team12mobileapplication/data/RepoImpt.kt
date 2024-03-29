@@ -386,6 +386,22 @@ class RepoImpt@Inject constructor(
     }.catch { e ->
         emit(Resource.Error(e.message ?: "An error occurred while fetching notifications."))
     }
+    override fun fetchProduct(product:String): Flow<Resource<String>> = flow {
+        emit(Resource.Loading())
 
+        val snapshot = firestore.collection("products")
+            .whereEqualTo("productName",product )
+            .get()
+            .await()
 
+        val productDetails = StringBuilder()
+        snapshot.documents.forEach { document ->
+            document.data?.forEach { (key, value) ->
+                productDetails.append("$key: $value\n")
+            }
+        }
+        emit(Resource.Success(productDetails.toString()))
+    }.catch { e ->
+        emit(Resource.Error(e.message ?: "An error occurred while fetching available products."))
+    }
 }

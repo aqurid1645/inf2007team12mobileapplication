@@ -3,6 +3,8 @@ package com.inf2007team12mobileapplication.data.model
 
 import kotlin.random.Random
 
+
+
 data class Product(
      val productId: String = "",
      val productName: String = "",
@@ -11,6 +13,7 @@ data class Product(
     val status: String = "",
      val productBarcodeID: String = ""
 )
+
 // Counter for product ID
 var productIdCounter = 1
 fun generateRandomProduct(): Product {
