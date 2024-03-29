@@ -72,7 +72,7 @@ fun HomePageScreen(navController: NavController, viewModel: HomePageViewModel = 
                 // Replace with your navigation action if you have one
             }
             ActionButton(icon = Icons.Default.Search, text = "Search for a resource") {
-                // Replace with your navigation action if you have one
+                navController.navigate("inventory")
             }
             ActionButton(icon = Icons.Default.List, text = "Items borrowed") {
                 // Replace with your navigation action if you have one

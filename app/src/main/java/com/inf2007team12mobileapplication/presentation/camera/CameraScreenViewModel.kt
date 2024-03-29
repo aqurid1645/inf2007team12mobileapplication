@@ -3,6 +3,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.inf2007team12mobileapplication.data.Repo
 import com.inf2007team12mobileapplication.data.Resource
+import com.inf2007team12mobileapplication.data.model.Product
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -36,7 +37,11 @@ class CameraScreenViewModel @Inject constructor(
             scannedProductId = scannedProductId
         )
     }
-
+    fun addproducts(product: Product){
+        viewModelScope.launch{
+            repository.writeToFirestore("products", product,null)
+        }
+    }
     fun confirmBorrowing() {
         val productId = _state.value.scannedProductId
         if (productId != null) {
