@@ -3,14 +3,17 @@ package com.inf2007team12mobileapplication.presentation.search
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -63,14 +66,52 @@ fun InventoryScreen(navController: NavController, viewModel: InventoryScreenView
             }
 
             // Display product details if available
-            state.productDetails?.let {
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(text = it)
-            }
+            state.productDetails?.let { productDetails ->
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(16.dp)
+                ) {
+                    item {
+                        Text(
+                            text = "Product Details",
+                            style = MaterialTheme.typography.h6,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                    }
 
-            // Display list of items
-            // You need to use LazyColumn for actual list implementation
-            Text("List of items will be displayed here.")
+                    productDetails.split("\n").forEach { line ->
+                        val parts = line.split(": ")
+                        if (parts.size == 2) {
+                            val (key, value) = parts
+                            item {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = "$key: ",
+                                        style = MaterialTheme.typography.body1,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Text(
+                                        text = value,
+                                        style = MaterialTheme.typography.body1
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(8.dp))
+                            }
+                        } else {
+                            item {
+                                Text(
+                                    text = line,
+                                    style = MaterialTheme.typography.body1,
+                                    modifier = Modifier.padding(bottom = 8.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

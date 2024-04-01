@@ -28,9 +28,16 @@ class InventoryScreenViewModel @Inject constructor(
 
                     is Resource.Success -> {
                         val products = resource.data
-                        _state.value = _state.value.copy(
-                            productDetails = products
-                        )
+                        if (products != null) {
+                            if (products.isEmpty()) {
+                                _state.value = _state.value.copy(
+                                    productDetails = "No item found for: $product")
+                            } else {
+                                _state.value = _state.value.copy(
+                                    productDetails = products
+                                )
+                            }
+                        }
                     }
 
                     is Resource.Error -> {
