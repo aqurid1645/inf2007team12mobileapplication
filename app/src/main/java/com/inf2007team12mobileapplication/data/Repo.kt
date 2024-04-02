@@ -1,5 +1,6 @@
 package com.inf2007team12mobileapplication.data
 
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.AuthResult
 import com.inf2007team12mobileapplication.data.model.Loan
 import com.inf2007team12mobileapplication.data.model.Notification
@@ -22,4 +23,6 @@ interface Repo {
     fun <T : Any> writeToFirestoreflow(collectionName: String, dataModel: T, documentId: String? = null) : Flow<Resource<Unit>>
     fun reportDefectiveProduct(defectReport: Report): Flow<Resource<Unit>>
     fun fetchNotificationsForLecturer(lecturerId: String): Flow<Resource<List<Notification>>>
+    suspend fun createDuplicateLoanWithNewEndDate(userId: String, newEndDate: Timestamp)
+    suspend fun getUserLoans(userId: String): List<Loan>
 }

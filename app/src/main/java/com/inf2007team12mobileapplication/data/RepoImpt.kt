@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.util.Calendar
+import java.util.Date
 import java.util.UUID
 import javax.inject.Inject
 
@@ -310,7 +311,58 @@ class RepoImpt@Inject constructor(
         }
     }
 
+    override suspend fun getUserLoans(userId: String): List<Loan> {
+        val firestoreInstance = FirebaseFirestore.getInstance()
+        val loansCollection = firestoreInstance.collection("loans")
+        val loansList = mutableListOf<Loan>()
 
+        try {
+            val querySnapshot = loansCollection
+                .whereEqualTo("userId", userId)
+                .get()
+                .await() // Use Kotlin Coroutines to await the result of the query
+
+            for (document in querySnapshot.documents) {
+                val loan = document.toObject(Loan::class.java)?.apply {
+                    loanId = document.id // Ensure the loanId is set to the document ID
+                }
+                loan?.let {
+                    loansList.add(it)
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("FirestoreError", "Error fetching user loans: ${e.message}")
+            // Handle exception or error logging here
+        }
+
+        return loansList
+    }
+
+    override suspend fun createDuplicateLoanWithNewEndDate(loanId: String, currentEndDate: Timestamp) {
+        val firestoreInstance = FirebaseFirestore.getInstance()
+        val loansCollection = firestoreInstance.collection("loans")
+        try {
+            // Fetch the original loan document
+            val originalLoanDocument = loansCollection.document(loanId).get().await()
+            val originalLoan = originalLoanDocument.toObject(Loan::class.java)
+
+            if (originalLoan != null) {
+                // Create a new Loan object by copying details from the original loan
+                val newLoan = originalLoan.copy(
+                    loanId = "", // Reset the loan ID, as it will be generated new upon document creation
+                    endDate = Timestamp(Date(currentEndDate.seconds * 1000 + 7889231400L)) // Calculate the new end date
+                )
+
+                // Add the new loan to the collection, auto-generating a new document ID
+                val newDocumentRef = loansCollection.document()
+                newLoan.loanId = newDocumentRef.id // Set the new loan ID to the new document's auto-generated ID
+
+                newDocumentRef.set(newLoan).await()
+            }
+        } catch (e: Exception) {
+            // Handle the error
+        }
+    }
 
     // Function to check resource availability
     override fun checkResourceAvailability(): Flow<Resource<List<Product>>> = flow {

@@ -8,6 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.inf2007team12mobileapplication.presentation.camera.CameraScreen
+import com.inf2007team12mobileapplication.presentation.extension.ExtensionScreen
 import com.inf2007team12mobileapplication.presentation.login.SignInScreen
 import com.inf2007team12mobileapplication.presentation.profile.ChangePasswordScreen
 import com.inf2007team12mobileapplication.presentation.profile.ProfileScreen
@@ -45,6 +46,9 @@ class MainActivity : ComponentActivity() {
                 }
                 composable("resetpassword") {
                     ChangePasswordScreen(navController = navController)
+                }
+                composable("extension") {
+                    ExtensionScreen(navController = navController)
                 }
 
                /* composable("report") {
