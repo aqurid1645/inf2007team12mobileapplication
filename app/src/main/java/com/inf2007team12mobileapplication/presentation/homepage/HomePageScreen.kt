@@ -29,7 +29,13 @@ import com.inf2007team12mobileapplication.R
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun HomePageScreen(navController: NavController, viewModel: HomePageViewModel = hiltViewModel()) {
+fun HomePageScreen(
+    navController: NavController,
+    viewModel: HomePageViewModel = hiltViewModel()
+) {
+
+    //To get user FCM
+    viewModel.getToken()
     Scaffold(
         topBar = {
             TopAppBar(

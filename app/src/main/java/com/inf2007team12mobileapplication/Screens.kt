@@ -10,6 +10,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 sealed class Screen(val route: String, val icon: ImageVector? = null) {
     object SignUp : Screen("signup")
     object SignIn : Screen("signin")
+    object NotificationScreen : Screen("notification")
+
     object Profile : Screen("profile")
     // Object CreateProfile : Screen("createprofile")
     object Camera : Screen("camera", Icons.Default.CameraAlt)
@@ -22,3 +24,5 @@ sealed class Screen(val route: String, val icon: ImageVector? = null) {
 
 
 }
+
+
