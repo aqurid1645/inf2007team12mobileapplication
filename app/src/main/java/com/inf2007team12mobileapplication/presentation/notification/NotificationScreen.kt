@@ -16,34 +16,33 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NotificationScreen() {
+fun NotificationScreen(viewModel: NotificationViewModel = hiltViewModel()) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Notification", fontWeight = FontWeight.Bold) }
+                title = { Text("Notifications", fontWeight = FontWeight.Bold) }
             )
         }
-    ) {
-        NotificationList()
+    ) {paddingValues ->
+        NotificationList(viewModel = viewModel, paddingValues = paddingValues)
     }
 }
 
 @Composable
-fun NotificationList() {
-    // Replace this with your actual data source
-    val notifications = listOf(
-        "Student A requested an exchange due to defective equipment 456",
-        "Student B requested an extension of equipment 123",
-        "Student C requested an exchange due to defective equipment 978"
-    )
+fun NotificationList(viewModel: NotificationViewModel, paddingValues: PaddingValues) {
+    val notifications by viewModel.notifications.collectAsState()
 
-    Column {
+    Column(
+        modifier = Modifier
+            .padding(paddingValues) // Apply the paddingValues here
+    ) {
         notifications.forEach { notification ->
-            NotificationItem(notificationText = notification)
+            NotificationItem(notificationText = notification.message) // Modify as needed
             Divider(color = Color.LightGray, thickness = 1.dp)
         }
     }
@@ -54,7 +53,7 @@ fun NotificationItem(notificationText: String) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
+            .padding(30.dp)
     ) {
         Text(notificationText)
 

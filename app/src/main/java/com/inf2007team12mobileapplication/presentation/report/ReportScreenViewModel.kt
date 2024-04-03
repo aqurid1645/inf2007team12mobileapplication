@@ -21,6 +21,7 @@ import com.google.firebase.ktx.Firebase
 import com.inf2007team12mobileapplication.data.Repo
 import com.inf2007team12mobileapplication.data.Resource
 import com.inf2007team12mobileapplication.data.model.Loan
+import com.inf2007team12mobileapplication.data.model.Notification
 import com.inf2007team12mobileapplication.data.model.Report
 import com.inf2007team12mobileapplication.data.model.UserProfile
 import dagger.hilt.android.internal.Contexts.getApplication
@@ -62,6 +63,15 @@ class ReportScreenViewModel @Inject constructor(
         fetchUserLoans()
     }
 
+    fun fetchUserLoans() {
+        val userId = getCurrentUserId()
+        viewModelScope.launch {
+            repository.getUserLoans(userId).collect { resource ->
+                _loans.value = resource
+            }
+        }
+    }
+
     fun Send_Notification(jsonObject: JSONObject?) {
         VolleyLog.DEBUG = true;
         val jsonObjReq: JsonObjectRequest = object : JsonObjectRequest(
@@ -101,30 +111,6 @@ class ReportScreenViewModel @Inject constructor(
         requestQueue.add(jsonObjReq)
     }
 
-//    fun fetchUserLoans() {
-//        val userId = getCurrentUserId()
-//        viewModelScope.launch {
-//            repository.getUserLoans(userId).collect { resource ->
-//                _loans.value = resource
-//            }
-//        }
-//    }
-
-//    weiwen
-//    Mock fetchUserLoans
-    fun fetchUserLoans() {
-        viewModelScope.launch {
-            val mockLoans = List(10) { index -> // Generate 10 Loan objects
-                Loan(
-                    loanId = UUID.randomUUID().toString(), // Generate unique ID
-                    productName = "Mock Product ${index + 1}",
-                    productBarcodeID = (12345 + index).toString() // Just an example to differentiate productBarcodeID
-                )
-            }
-            _loans.value = Resource.Success(mockLoans)
-        }
-    }
-
 
     fun reportDefectiveProduct(defectReport: Report) = viewModelScope.launch {
         repository.reportDefectiveProduct(defectReport).collect { resource ->
@@ -158,6 +144,25 @@ class ReportScreenViewModel @Inject constructor(
                                 } catch (e: JSONException) {
                                     e.printStackTrace()
                                 }
+                                // Upon successful sending of push notification, create and store the notification in Firestore
+                                val notification = Notification(
+                                    notificationId = UUID.randomUUID().toString(),
+                                    userId = getCurrentUserId(),
+                                    type = defectReport.problemType,
+                                    category = "DefectReport",
+                                    description = defectReport.description,
+                                    productBarcodeID = defectReport.productBarcodeID,
+                                    productName = defectReport.productName,
+                                    productDescription = defectReport.productDescription,
+                                    productCategory = defectReport.productCategory,
+                                    relatedId = defectReport.reportId,
+                                    message = "New defect report: ${defectReport.productName} - ${defectReport.description}",
+                                    status = "Pending"
+                                )
+                                // Write the notification object to Firestore
+                                repository.writeToFirestore("notifications", notification)
+
+
                             } else {
                             }
                         }
