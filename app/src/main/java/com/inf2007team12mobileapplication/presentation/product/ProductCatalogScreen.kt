@@ -36,6 +36,8 @@ fun ProductCatalogScreen(
                 // Define what happens when you click 'Start borrowing'
                 // For example, you might navigate to a product detail screen:
                 // navController.navigate("productDetail/${product.id}")
+                navController.navigate("camera")
+
             })
         }
     }
@@ -75,7 +77,7 @@ fun ProductCard(
             )
             Spacer(modifier = Modifier.height(16.dp))
             Button(
-                onClick = onBorrowClick,
+                onClick = onBorrowClick /*nav to camera screen */,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 50.dp)
