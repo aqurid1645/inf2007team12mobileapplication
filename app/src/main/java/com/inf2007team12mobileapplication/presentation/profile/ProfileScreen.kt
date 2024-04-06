@@ -15,16 +15,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -44,196 +39,130 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.google.firebase.auth.FirebaseAuth
 import com.inf2007team12mobileapplication.data.model.UserProfile
 import kotlinx.coroutines.launch
 
 
 @Composable
-fun ProfileScreen(navController: NavController, viewModel: ProfileScreenViewModel = hiltViewModel()) {
-    val userId = FirebaseAuth.getInstance().currentUser?.uid
-    if (userId == null) {
-        // Use launchEffect to navigate without recomposing the whole composable
-        LaunchedEffect(true) {
-            navController.navigate("signin") {
-                // Remove all the previous screens from the back stack
-                popUpTo(0) {
-                    inclusive = true
-                }
-            }
-        }
-        return
-    }
-
-    // This launches only once per composable call to fetch user profile
-    LaunchedEffect(key1 = userId) {
-        viewModel.fetchUserProfile(userId)
-    }
-
+fun ProfileScreen(
+    navController: NavController,
+    viewModel: ProfileScreenViewModel = hiltViewModel()
+) {
     val userProfile by viewModel.userProfile.collectAsState(initial = null)
+    val currentUserId by viewModel.currentUserId.collectAsState(initial = null)
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    var studentID by remember { mutableStateOf("") } // Add this line
+    var name by remember { mutableStateOf("") }
+    var bio by remember { mutableStateOf("") }
+    var isEditingName by remember { mutableStateOf(false) }
+    var isEditingBio by remember { mutableStateOf(false) }
+    var isEditingStudentID by remember { mutableStateOf(false) }
+
+    LaunchedEffect(true) {
+        currentUserId?.let { userId ->
+            viewModel.fetchUserProfile(userId)
+        }
+    }
 
     userProfile?.let { profile ->
-        var name by remember { mutableStateOf(profile.name) }
-        var bio by remember { mutableStateOf(profile.bio) }
-        var contactNumber by remember { mutableStateOf(profile.contactNumber) }
-        var role by remember { mutableStateOf(profile.role) }
-        var isEditingAnyField by remember { mutableStateOf(false) }
-        val coroutineScope = rememberCoroutineScope()
+        name = profile.name
+        bio = profile.bio
+        studentID = profile.studentID
+    }
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState())
-        ) {
-            Text(
-                text = "Welcome ${name}",
-                style = MaterialTheme.typography.headlineLarge,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState())
+    ) {
+        Text(
+            text = "Welcome $name",
+            style = MaterialTheme.typography.headlineLarge,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
 
-            ProfileInfoItem(
-                label = "Name",
-                value = name,
-                onValueChange = { name = it },
-                onEditingChanged = { isEditingAnyField = it }
-            )
+        ProfileInfoItem(
+            label = "Name",
+            value = name,
+            onValueChange = { updatedValue ->
+                name = updatedValue
+            },
+            isEditing = isEditingName,
+            onEditingChanged = { isEditingName = it }
+        )
 
-            ProfileInfoItem(
-                label = "Bio",
-                value = bio,
-                onValueChange = { bio = it },
-                onEditingChanged = { isEditingAnyField = it }
-            )
+        ProfileInfoItem(
+            label = "Bio",
+            value = bio,
+            onValueChange = { updatedValue ->
+                bio = updatedValue
+            },
+            isEditing = isEditingBio,
+            onEditingChanged = { isEditingBio = it }
+        )
 
-            ProfileInfoItem(
-                label = "Contact Number",
-                value = contactNumber,
-                validate = ::isValidSingaporeContact,
-                onValueChange = { contactNumber = it },
-                onEditingChanged = { isEditingAnyField = it },
-                errorMessage = "Invalid contact number. Please use the +65 prefix followed by 8 digits."
+        ProfileInfoItem(
+            label = "Student ID",
+            value = studentID,
+            onValueChange = { updatedValue -> studentID = updatedValue },
+            isEditing = isEditingStudentID,
+            onEditingChanged = { isEditing -> isEditingStudentID = isEditing }
+        )
 
-            )
-            //RoleDropdown(role = role, onRoleSelected = { role = it }, expanded = expanded, onExpandedChange = { expanded = it }, roleOptions = roleOptions)
+        Spacer(modifier = Modifier.height(16.dp))
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Button(
-                onClick = {
-                    coroutineScope.launch {
-                        // Check if any field is currently being edited or if the contact number is invalid.
-                        if (!isEditingAnyField && isValidSingaporeContact(contactNumber)) {
-                            viewModel.isContactNumberTaken(userId, contactNumber) { isTaken ->
-                                if (!isTaken) {
-                                    // All checks passed, update the profile.
-                                    viewModel.updateUserProfile(userId, UserProfile(name, bio, contactNumber, role)) {
-                                        Toast.makeText(context, "Profile updated successfully", Toast.LENGTH_SHORT).show()
-                                    }
-                                } else {
-                                    // Contact number is already taken, notify the user.
-                                    Toast.makeText(context, "Contact number is already in use.", Toast.LENGTH_SHORT).show()
-                                }
-                            }
-                        } else {
-                            // Editing is in progress or contact number is invalid, notify the user.
-                            if(isEditingAnyField) {
-                                Toast.makeText(context, "Please finish editing before saving.", Toast.LENGTH_SHORT).show()
-                            } else {
-                                // Specific message for invalid contact number
-                                Toast.makeText(context, "Invalid contact number. Please use the +65 prefix followed by 8 digits.", Toast.LENGTH_LONG).show()
-                            }
+        Button(
+            onClick = {
+                coroutineScope.launch {
+                    if (!isEditingName && !isEditingBio) {
+                        viewModel.updateUserProfile(viewModel.getCurrentUserId(),
+                            UserProfile(name, studentID,bio)
+                        ) {
+                            Toast.makeText(
+                                context,
+                                "Profile updated successfully",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
+                    } else {
+                        Toast.makeText(
+                            context,
+                            "Please finish editing before saving.",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
-                },
-                modifier = Modifier.fillMaxWidth(),
-                enabled = !isEditingAnyField && userProfile != null // Only enable the save button if no fields are being edited.
-            ) {
-                Text("Save Profile")
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Button(onClick = {
-                navController.navigate("Camera") {
-                    popUpTo(0) { inclusive = true }
                 }
-            }) {
-                Text("Camera")
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Button(onClick = {
-                navController.navigate("resetpassword") {
-                }
-            }) {
-                Text("Reset Password")
-            }
-            Button(onClick = {
-                navController.navigate("report") {
-                }
-            }) {
-                Text("Report")
-            }
-
-            Button(onClick = {
-                viewModel.signout()
-                navController.navigate("signin") {
-                    popUpTo(0) { inclusive = true }
-                }
-            }) {
-                Text("Logout")
-            }
+            },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !isEditingName && !isEditingBio && userProfile != null
+        ) {
+            Text("Save Profile")
         }
 
-    } ?: run {
+        Spacer(modifier = Modifier.height(16.dp))
 
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
+        Button(onClick = {
+            navController.navigate("resetpassword") {
+            }
+        }) {
+            Text("Reset Password")
+        }
+
+        Button(onClick = {
+            viewModel.signout()
+            navController.navigate("signin") {
+                popUpTo(0) { inclusive = true }
+            }
+        }) {
+            Text("Logout")
         }
     }
-}
 
-
-
-@Composable
-fun RoleDropdown(
-    role: String,
-    onRoleSelected: (String) -> Unit,
-    expanded: Boolean,
-    onExpandedChange: (Boolean) -> Unit,
-    roleOptions: List<String>
-) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        OutlinedTextField(
-            value = role.ifEmpty { "Select Role" },
-            onValueChange = { },
-            readOnly = true,
-            label = { Text("Role") },
-            trailingIcon = {
-                Icon(
-                    imageVector = Icons.Filled.ArrowDropDown,
-                    contentDescription = "Dropdown Icon",
-                    Modifier.clickable { onExpandedChange(true) } // Only open the dropdown, don't toggle
-                )
-            },
-            modifier = Modifier.fillMaxWidth()
-        )
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { onExpandedChange(false) },
-            modifier = Modifier.fillMaxWidth() // Apply the width modifier directly here
-        ) {
-            roleOptions.forEach { selection ->
-                DropdownMenuItem(
-                    onClick = {
-                        onRoleSelected(selection)
-                        onExpandedChange(false)
-                    },
-                    text = { Text(selection) }
-                )
-            }
+    if (userProfile == null) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
         }
     }
 }
@@ -244,27 +173,24 @@ fun ProfileInfoItem(
     label: String,
     value: String,
     onValueChange: (String) -> Unit,
-    validate: (String) -> Boolean = { true },
-    onEditingChanged: (Boolean) -> Unit, // New parameter to report back editing state
-    errorMessage: String = "" // Add the errorMessage parameter with a default value
-
+    isEditing: Boolean,
+    onEditingChanged: (Boolean) -> Unit
 ) {
-    var editing by remember { mutableStateOf(false) }
     var text by remember { mutableStateOf(value) }
 
     LaunchedEffect(value) {
         text = value
     }
 
-    LaunchedEffect(editing) {
-        onEditingChanged(editing) // Report editing state back to the parent
+    LaunchedEffect(isEditing) {
+        onEditingChanged(isEditing)
     }
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
-            .clickable { editing = true },
+            .clickable { onEditingChanged(true) },
         elevation = CardDefaults.cardElevation(4.dp),
         shape = MaterialTheme.shapes.medium
     ) {
@@ -274,41 +200,30 @@ fun ProfileInfoItem(
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
             )
-            if (editing) {
+            if (isEditing) {
                 OutlinedTextField(
                     value = text,
                     onValueChange = { text = it },
                     label = { Text(label) },
                     singleLine = true,
-                    isError = !validate(text) && text.isNotEmpty(),
                     modifier = Modifier.fillMaxWidth(),
                     colors = TextFieldDefaults.outlinedTextFieldColors(
                         focusedBorderColor = MaterialTheme.colorScheme.primary,
                         unfocusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
                     )
                 )
-                if (!validate(text) && text.isNotEmpty()) {
-                    Text(
-                        text = errorMessage,
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.labelSmall,
-                        modifier = Modifier.padding(start = 16.dp, top = 4.dp)
-                    )
-                }
                 Row(
                     modifier = Modifier.padding(top = 8.dp),
                     horizontalArrangement = Arrangement.End
                 ) {
-                    TextButton(onClick = { editing = false }) {
+                    TextButton(onClick = { onEditingChanged(false) }) {
                         Text("Cancel")
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(
                         onClick = {
-                            if (validate(text) || text.isEmpty()) {
-                                onValueChange(text)
-                                editing = false
-                            }
+                            onValueChange(text)
+                            onEditingChanged(false)
                         }
                     ) {
                         Text("Save")
@@ -324,13 +239,3 @@ fun ProfileInfoItem(
         }
     }
 }
-
-fun isValidSingaporeContact(contact: String): Boolean {
-    return contact.matches(Regex("^\\+65\\d{8}$"))
-}
-
-
-fun isValidInternationalContact(contact: String): Boolean {
-    return contact.matches(Regex("^\\+?[1-9]\\d{1,14}$"))
-}
-

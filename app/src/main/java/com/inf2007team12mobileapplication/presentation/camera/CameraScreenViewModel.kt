@@ -40,12 +40,41 @@ class CameraScreenViewModel @Inject constructor(
     }
     // Streamlined to reduce redundancy and focus on functionality.
     fun startAddingProduct() {
+        // First check the user role
+        viewModelScope.launch {
+            repository.fetchUserRole().collect { roleResource ->
+                when (roleResource) {
+                    is Resource.Success -> {
+                        if (roleResource.data == "lecturer") {
+                            // If the user is a lecturer, proceed with scanning
+                            initiateScanningForProductAddition()
+                        } else {
+                            // If the user is not a lecturer, show an error message
+                            _state.value = _state.value.copy(
+                                message = "You do not have permission to add products."
+                            )
+                        }
+                    }
+                    is Resource.Error -> {
+                        _state.value = _state.value.copy(
+                            errorMessage = roleResource.message ?: "Failed to fetch user role.",
+                            showError = true
+                        )
+                    }
+                    is Resource.Loading -> {
+                        // Optionally handle loading state
+                    }
+                }
+            }
+        }
+    }
+    private fun initiateScanningForProductAddition() {
         viewModelScope.launch {
             repository.startScanning().collect { scannedBarcode ->
                 if (!scannedBarcode.isNullOrBlank()) {
                     _state.value = _state.value.copy(
-                        showAddProductDialog = true, // Control showing the dialog in your UI
-                        scannedProductBarcodeId = scannedBarcode // Store scanned barcode ID
+                        showAddProductDialog = true,
+                        scannedProductBarcodeId = scannedBarcode
                     )
                 } else {
                     updateStateForError("Scanning failed or no barcode detected.")
@@ -53,6 +82,7 @@ class CameraScreenViewModel @Inject constructor(
             }
         }
     }
+
 
     // Enhanced for clarity and error handling.
     fun submitNewProductDetails(productName: String, productDescription: String, productCategory: String, status: String) {
@@ -63,7 +93,7 @@ class CameraScreenViewModel @Inject constructor(
 
     // Refactored to handle loading and message updates more effectively.
     fun addProduct(product: Product) {
-        // Indicate loading state before starting the repository operation
+
         _state.value = _state.value.copy(isLoading = true)
         viewModelScope.launch {
             repository.writeToFirestoreflow("products", product, null).collect { result ->
