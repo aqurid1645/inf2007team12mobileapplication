@@ -5,6 +5,7 @@ import com.google.firebase.Timestamp
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.toObject
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.codescanner.GmsBarcodeScanner
 import com.inf2007team12mobileapplication.data.model.Loan
@@ -28,7 +29,21 @@ class RepoImpt@Inject constructor(
     private val firebaseAuth: FirebaseAuth,
     private val scanner: GmsBarcodeScanner,
     private val firestore: FirebaseFirestore
+
 ) : Repo {
+
+    fun fetchProducts(): Flow<List<Product>> = callbackFlow {
+        val listenerRegistration = firestore.collection("products")
+            .addSnapshotListener { snapshot, e ->
+                if (e != null) {
+                    close(e) // Close the flow with an error
+                    return@addSnapshotListener
+                }
+                val products = snapshot?.documents?.mapNotNull { it.toObject(Product::class.java) }.orEmpty()
+                trySend(products) // Send the products list to the flow
+            }
+        awaitClose { listenerRegistration.remove() } // Remove the listener when the flow collector is done
+    }
 
 
     override fun loginUser(email: String, password: String): Flow<Resource<AuthResult>> {
@@ -110,6 +125,10 @@ class RepoImpt@Inject constructor(
             }
         }
     }
+
+
+
+
 
 
     private fun getDetails(barcode: Barcode): String {

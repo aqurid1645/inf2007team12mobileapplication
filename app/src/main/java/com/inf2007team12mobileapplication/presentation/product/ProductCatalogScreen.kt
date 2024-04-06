@@ -19,6 +19,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.compose.runtime.livedata.observeAsState
 import com.inf2007team12mobileapplication.R
+import com.inf2007team12mobileapplication.data.model.Product
 
 @Composable
 fun ProductCatalogScreen(
@@ -50,7 +51,7 @@ fun ProductCatalogScreen(
 
 @Composable
 fun ProductCard(
-    product: ProductCatalog,
+    product: Product,
     onBorrowClick: () -> Unit,
     onSearchClick: () -> Unit
 ) {

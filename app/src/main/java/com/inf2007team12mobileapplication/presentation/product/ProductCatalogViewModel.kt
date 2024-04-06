@@ -3,26 +3,26 @@ package com.inf2007team12mobileapplication.presentation.product
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.toObject
-
-class ProductCatalogViewModel : ViewModel() {
-    private val _products = MutableLiveData<List<ProductCatalog>>()
-    val products: LiveData<List<ProductCatalog>> = _products
+import androidx.lifecycle.viewModelScope
+import com.inf2007team12mobileapplication.data.model.Product
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+import com.inf2007team12mobileapplication.data.RepoImpt
+@HiltViewModel
+class ProductCatalogViewModel @Inject constructor(
+    private val repo: RepoImpt
+) : ViewModel() {
+    private val _products = MutableLiveData<List<Product>>()
+    val products: LiveData<List<Product>> = _products
 
     init {
-        FirebaseFirestore.getInstance().collection("products")
-            .addSnapshotListener { snapshot, e ->
-                if (e != null) {
-                    // Log the error or handle the exception
-                    return@addSnapshotListener
-                }
-                val productList = snapshot?.documents?.mapNotNull { doc ->
-                    doc.toObject<ProductCatalog>()?.apply {
-                        // Here you can assign the document ID to a field if needed
-                    }
-                }.orEmpty()
+        viewModelScope.launch {
+            repo.fetchProducts().collect { productList ->
                 _products.value = productList
             }
+        }
     }
+
+
 }
