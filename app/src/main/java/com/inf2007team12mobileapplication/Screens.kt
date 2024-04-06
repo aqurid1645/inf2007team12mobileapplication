@@ -5,6 +5,7 @@ import androidx.compose.material.icons.automirrored.filled.ViewList
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Report
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class Screen(val route: String, val icon: ImageVector? = null) {
@@ -18,7 +19,8 @@ sealed class Screen(val route: String, val icon: ImageVector? = null) {
     object ResetPassword : Screen("resetpassword")
     object Report : Screen("report", Icons.Default.Report)
     object Home : Screen("home", Icons.Default.Home)
-    object Inventory : Screen("inventory")
+    object Inventory : Screen("inventory", Icons.Default.Search)
+
 
     object ProductCatalog: Screen("productcatalog",Icons.AutoMirrored.Filled.ViewList)
 

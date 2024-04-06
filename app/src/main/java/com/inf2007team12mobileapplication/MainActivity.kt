@@ -23,27 +23,24 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
-import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.google.android.gms.common.util.CollectionUtils.listOf
 import com.google.firebase.FirebaseApp
 import com.inf2007team12mobileapplication.presentation.camera.CameraScreen
 import com.inf2007team12mobileapplication.presentation.homepage.HomePageScreen
 import com.inf2007team12mobileapplication.presentation.login.SignInScreen
-import com.inf2007team12mobileapplication.presentation.notification.NotificationList
 import com.inf2007team12mobileapplication.presentation.notification.NotificationScreen
-import com.inf2007team12mobileapplication.presentation.camera.CameraScreen
-import com.inf2007team12mobileapplication.presentation.catalog.ProductCatalogScreen
-import com.inf2007team12mobileapplication.presentation.homepage.HomePageScreen
-import com.inf2007team12mobileapplication.presentation.login.SignInScreen
+import com.inf2007team12mobileapplication.presentation.product.ProductCatalogScreen
 import com.inf2007team12mobileapplication.presentation.profile.ChangePasswordScreen
 import com.inf2007team12mobileapplication.presentation.profile.ProfileScreen
 import com.inf2007team12mobileapplication.presentation.report.ReportScreen
@@ -162,8 +159,14 @@ fun MainScreen() {
             composable(Screen.ResetPassword.route) { ChangePasswordScreen(navController) }
             composable(Screen.Report.route) { ReportScreen(navController) }
             composable(Screen.Home.route) { HomePageScreen(navController) }
-            composable(Screen.Inventory.route) { InventoryScreen(navController) }
-            composable(Screen.ProductCatalog.route) { ProductCatalogScreen(navController)}
+            composable(
+                route = Screen.Inventory.route + "/{productName}",
+                arguments = listOf(navArgument("productName") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val productName = backStackEntry.arguments?.getString("productName") ?: ""
+                InventoryScreen(productName, navController)
+            }
+            composable(Screen.ProductCatalog.route) { ProductCatalogScreen(navController) }
 
             // Define other composable screens here
         }

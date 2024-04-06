@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.LocalAbsoluteElevation
 import androidx.compose.material.Scaffold
 import androidx.compose.material.SnackbarHost
 import androidx.compose.material.icons.Icons
@@ -46,8 +47,6 @@ fun ReportScreen(navController: NavController, viewModel: ReportScreenViewModel 
     val scaffoldState = rememberScaffoldState()
     val submissionStatus by viewModel.submissionStatus.collectAsState()
     val keyboardController = LocalSoftwareKeyboardController.current
-
-
     LaunchedEffect(key1 = true) {
         viewModel.fetchUserLoans()
     }
@@ -59,7 +58,12 @@ fun ReportScreen(navController: NavController, viewModel: ReportScreenViewModel 
 
     Scaffold(
         scaffoldState = scaffoldState,
-        snackbarHost = { SnackbarHost(hostState = it) }
+        snackbarHost = {
+            SnackbarHost(
+                hostState = it,
+                modifier = Modifier.padding(bottom = 56.dp) // Adjust the padding as needed
+            )
+        }
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -256,3 +260,4 @@ fun LoanDropdownMenu(
         }
     }
 }
+

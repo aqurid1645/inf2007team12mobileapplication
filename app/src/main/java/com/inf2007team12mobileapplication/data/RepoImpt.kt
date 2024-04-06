@@ -158,11 +158,11 @@ class RepoImpt@Inject constructor(
             }
 
             Barcode.TYPE_SMS -> {
-                "sms : ${barcode.sms}"
+                "${barcode.sms}"
             }
 
             Barcode.TYPE_TEXT -> {
-                "text : ${barcode.rawValue}"
+                "${barcode.rawValue}"
             }
 
             Barcode.TYPE_UNKNOWN -> {

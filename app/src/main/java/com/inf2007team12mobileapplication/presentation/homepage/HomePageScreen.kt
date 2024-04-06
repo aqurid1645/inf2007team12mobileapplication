@@ -45,7 +45,7 @@ fun HomePageScreen(
 
                         navController.navigate("profile")
                     }) {
-                        Icon(Icons.Default.AccountCircle, contentDescription = "User Profile", Modifier.size(20.dp))
+                        Icon(Icons.Default.AccountCircle, contentDescription = "User Profile", Modifier.size(30.dp))
                     }
                 }
             )

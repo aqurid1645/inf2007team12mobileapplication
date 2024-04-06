@@ -61,7 +61,6 @@ class CameraScreenViewModel @Inject constructor(
                             updateStateForSuccess("Product ID $productId borrowed successfully.")
                         }
                         is Resource.Error -> {
-                            // Update UI for error
                             updateStateForError( "Failed to borrow product ID $productId.")
                         }
                     }

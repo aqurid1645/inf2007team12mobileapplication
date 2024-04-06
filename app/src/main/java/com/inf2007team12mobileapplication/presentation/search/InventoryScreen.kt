@@ -16,66 +16,83 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
-fun InventoryScreen(navController: NavController, viewModel: InventoryScreenViewModel = hiltViewModel()) {
+fun InventoryScreen(productName: String, navController: NavHostController, viewModel: InventoryScreenViewModel = hiltViewModel()) {
     var searchText by remember { mutableStateOf("") }
     val state = viewModel.state.collectAsState().value
+
+    LaunchedEffect(productName) {
+        viewModel.getProduct(productName)
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Resources Management") },
-                backgroundColor = Color.White,
-                contentColor = Color.Black
+                title = { Text("Inventory Search") },
+                backgroundColor = MaterialTheme.colors.primary,
+                contentColor = MaterialTheme.colors.onPrimary
             )
         }
     ) {
-        Column(modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)) {
-            OutlinedTextField(
-                value = searchText,
-                onValueChange = { searchText = it },
-                leadingIcon = {
-                    Icon(Icons.Filled.Search, contentDescription = "Search Icon")
-                },
-                label = { Text("Search") },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            DropdownField("Resource Type")
-            DropdownField("Loan Start Date")
-            DropdownField("Loan End Date")
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Button(
-                onClick = {
-                    viewModel.getProduct(searchText)
-                    // Log the search term or perform a search operation
-                    println("Search submitted for: $searchText")
-                },
+        Column(modifier = Modifier.fillMaxSize()) {
+            // Search Bar
+            Surface(
+                color = MaterialTheme.colors.surface,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Search")
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    OutlinedTextField(
+                        value = searchText,
+                        onValueChange = { searchText = it },
+                        leadingIcon = {
+                            Icon(Icons.Filled.Search, contentDescription = "Search Icon")
+                        },
+                        label = { Text("Search") },
+                        modifier = Modifier.weight(1f)
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Button(
+                        onClick = {
+                            viewModel.getProduct(searchText)
+                        }
+                    ) {
+                        Text("Search")
+                    }
+                }
             }
 
-            // Display product details if available
-            state.productDetails?.let { productDetails ->
-                LazyColumn(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentPadding = PaddingValues(16.dp)
+            // Filters
+            Surface(
+                color = MaterialTheme.colors.surface,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    modifier = Modifier.padding(16.dp)
                 ) {
+                    DropdownField("Resource Type")
+                    DropdownField("Loan Start Date")
+                    DropdownField("Loan End Date")
+                }
+            }
+
+            // Search Results
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(16.dp)
+            ) {
+                state.productDetails?.let { productDetails ->
                     item {
                         Text(
-                            text = "Product Details",
+                            text = "Search Results",
                             style = MaterialTheme.typography.h6,
-                            modifier = Modifier.padding(bottom = 8.dp)
+                            modifier = Modifier.padding(bottom = 16.dp)
                         )
                     }
 
@@ -90,7 +107,7 @@ fun InventoryScreen(navController: NavController, viewModel: InventoryScreenView
                                 ) {
                                     Text(
                                         text = "$key: ",
-                                        style = MaterialTheme.typography.body1,
+                                        style = MaterialTheme.typography.subtitle1,
                                         fontWeight = FontWeight.Bold
                                     )
                                     Text(
@@ -98,7 +115,7 @@ fun InventoryScreen(navController: NavController, viewModel: InventoryScreenView
                                         style = MaterialTheme.typography.body1
                                     )
                                 }
-                                Spacer(modifier = Modifier.height(8.dp))
+                                Divider(modifier = Modifier.padding(vertical = 8.dp))
                             }
                         } else {
                             item {
@@ -117,36 +134,6 @@ fun InventoryScreen(navController: NavController, viewModel: InventoryScreenView
 }
 
 @Composable
-fun DropdownField(label: String) {
-    var expanded by remember { mutableStateOf(false) }
-    var selectedOption by remember { mutableStateOf("") }
+fun DropdownField(s: String) {
 
-    Box(modifier = Modifier.fillMaxWidth()) {
-        ClickableText(
-            text = AnnotatedString(if (selectedOption.isEmpty()) label else selectedOption),
-            onClick = { expanded = !expanded },
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.LightGray)
-                .padding(16.dp)
-        )
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
-        ) {
-            DropdownMenuItem(onClick = {
-                selectedOption = "Option 1"
-                expanded = false
-            }) {
-                Text("Option 1")
-            }
-            DropdownMenuItem(onClick = {
-                selectedOption = "Option 2"
-                expanded = false
-            }) {
-                Text("Option 2")
-            }
-            // Add more DropdownMenuItems as needed
-        }
-    }
 }
