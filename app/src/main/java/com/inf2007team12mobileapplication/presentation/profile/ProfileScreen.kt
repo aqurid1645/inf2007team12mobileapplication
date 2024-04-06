@@ -88,7 +88,7 @@ fun ProfileScreen(navController: NavController, viewModel: ProfileScreenViewMode
                 .verticalScroll(rememberScrollState())
         ) {
             Text(
-                text = "Profile",
+                text = "Welcome ${name}",
                 style = MaterialTheme.typography.headlineLarge,
                 modifier = Modifier.padding(bottom = 16.dp)
             )

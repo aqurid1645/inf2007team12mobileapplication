@@ -15,14 +15,14 @@ sealed class Screen(val route: String, val icon: ImageVector? = null) {
 
     object Profile : Screen("profile")
     // Object CreateProfile : Screen("createprofile")
-    object Camera : Screen("camera", Icons.Default.CameraAlt)
+    object Camera : Screen("Camera", Icons.Default.CameraAlt)
     object ResetPassword : Screen("resetpassword")
-    object Report : Screen("report", Icons.Default.Report)
-    object Home : Screen("home", Icons.Default.Home)
+    object Report : Screen("Report", Icons.Default.Report)
+    object Home : Screen("Home", Icons.Default.Home)
     object Inventory : Screen("inventory", Icons.Default.Search)
 
 
-    object ProductCatalog: Screen("productcatalog",Icons.AutoMirrored.Filled.ViewList)
+    object ProductCatalog: Screen("Catalog",Icons.AutoMirrored.Filled.ViewList)
 
 
 }

@@ -71,10 +71,10 @@ fun HomePageScreen(
 
 
             ActionButton(icon = Icons.Default.CameraAlt, text = "Scan resource") {
-                    navController.navigate("camera") // Replace with your correct route
+                    navController.navigate("Camera") // Replace with your correct route
                 }
             ActionButton(icon = Icons.Default.ReportProblem, text = "Report a defect") {
-                navController.navigate("report") // Replace with your correct route
+                navController.navigate("Report") // Replace with your correct route
             }
             ActionButton(icon = Icons.Default.AccessTime, text = "Extend a loan") {
                 // Replace with your navigation action if you have one
@@ -86,7 +86,7 @@ fun HomePageScreen(
                 // Replace with your navigation action if you have one
             }
             ActionButton(icon = Icons.AutoMirrored.Filled.ViewList, text = "Product Catalog") {
-                navController.navigate("productcatalog")
+                navController.navigate("Catalog")
             }
         }
     }

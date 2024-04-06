@@ -36,7 +36,7 @@ fun ProductCatalogScreen(
                 // Define what happens when you click 'Start borrowing'
                 // For example, you might navigate to a product detail screen:
                 // navController.navigate("productDetail/${product.id}")
-                navController.navigate("camera")
+                navController.navigate("Camera")
 
             }, onSearchClick = {
                 // Define what happens when you click 'Search'
