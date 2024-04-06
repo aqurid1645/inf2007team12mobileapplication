@@ -16,6 +16,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -25,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.inf2007team12mobileapplication.R
+import com.inf2007team12mobileapplication.data.Resource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -34,8 +36,9 @@ fun HomePageScreen(
     viewModel: HomePageViewModel = hiltViewModel()
 ) {
 
-    //To get user FCM
-    viewModel.getToken()
+    // Observe the token update status
+    viewModel.tokenUpdateStatus.collectAsState().value
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -57,6 +60,7 @@ fun HomePageScreen(
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+
             // Replace with the actual image resource name for your Raspberry Pi image
             val image = painterResource(id = R.drawable.ic_raspberry_pi)
             Image(

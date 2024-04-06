@@ -27,4 +27,7 @@ interface Repo {
     fun reportDefectiveProduct(defectReport: Report): Flow<Resource<Unit>>
     fun fetchNotificationsForLecturer(lecturerId: String): Flow<Resource<List<Notification>>>
     fun fetchProduct(product:String): Flow<Resource<String>>
+
+    fun getToken(): Flow<Resource<Unit>>
+
 }

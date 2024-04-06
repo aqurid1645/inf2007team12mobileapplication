@@ -1,68 +1,39 @@
 package com.inf2007team12mobileapplication.presentation.homepage
 
+import com.inf2007team12mobileapplication.data.Repo
 import android.content.ContentValues
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessaging
+import com.inf2007team12mobileapplication.data.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
 @HiltViewModel
 class HomePageViewModel @Inject constructor(
-    // Assume UserRepository is a dependency that you want to inject.
-    // private val userRepository: UserRepository
+    private val repo: Repo // Inject Repo implementation
 ) : ViewModel() {
-    private val db = Firebase.firestore
-    var token: String? = null
+    private val _tokenUpdateStatus = MutableStateFlow<Resource<Unit>>(Resource.Loading())
+    val tokenUpdateStatus: StateFlow<Resource<Unit>> = _tokenUpdateStatus
 
-    fun getToken() {
-        try {
-            val userId = FirebaseAuth.getInstance().currentUser?.uid
-            FirebaseMessaging.getInstance().token
-                .addOnCompleteListener { task ->
-                    try {
-                        token = task.result
-                        Log.d("token", "" + token)
-                        db.collection("users")
-                            .document(userId.toString())
-                            .update(
-                                "fcmtoken", token
-                            )
-                            .addOnSuccessListener {
-                            }
-                            .addOnFailureListener { e ->
-                                Log.w(ContentValues.TAG, "Error updating document", e)
-                                if ((e as FirebaseFirestoreException).code
-                                    == FirebaseFirestoreException.Code.NOT_FOUND
-                                ) {
-                                    val data = hashMapOf("fcmtoken" to token)
+    init {
+        getToken()
+    }
 
-                                    db.collection("users")
-                                        .document(userId.toString())
-                                        .set(data)
-                                        .addOnSuccessListener {
-                                        }
-                                        .addOnFailureListener { e ->
-                                            Log.w(ContentValues.TAG, "Error updating document", e)
-                                        }
-                                }
-                            }
-
-                    } catch (e: NullPointerException) {
-                        e.printStackTrace()
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
-                }
-        } catch (e: Exception) {
-            e.printStackTrace()
+    private fun getToken() {
+        viewModelScope.launch {
+            repo.getToken().collect { status ->
+                _tokenUpdateStatus.value = status
+            }
         }
     }
-    // Your ViewModel code here
 }
-

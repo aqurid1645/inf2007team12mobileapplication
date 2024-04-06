@@ -23,13 +23,40 @@ import androidx.hilt.navigation.compose.hiltViewModel
 @Composable
 fun NotificationScreen(viewModel: NotificationViewModel = hiltViewModel()) {
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Notifications", fontWeight = FontWeight.Bold) }
-            )
+        topBar = { TopAppBar(title = { Text("Notifications", fontWeight = FontWeight.Bold) }) }
+    ) { paddingValues ->
+        val notifications by viewModel.notifications.collectAsState()
+
+        Column(modifier = Modifier.padding(paddingValues)) {
+            notifications.forEach { notification ->
+                NotificationItem(
+                    notificationText = notification.message,
+                    onApproveClicked = {
+                        // Assuming you have access to the necessary data
+                        viewModel.sendApprovalNotification(studentUserId = notification.userId, reportId = notification.relatedId, productName = notification.productName)
+                    }
+                )
+                Divider(color = Color.LightGray, thickness = 1.dp)
+            }
         }
-    ) {paddingValues ->
-        NotificationList(viewModel = viewModel, paddingValues = paddingValues)
+    }
+}
+
+@Composable
+fun NotificationItem(notificationText: String, onApproveClicked: () -> Unit) {
+    Column(modifier = Modifier.fillMaxWidth().padding(30.dp)) {
+        Text(notificationText)
+
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+        ) {
+            Button(onClick = onApproveClicked, modifier = Modifier.weight(1f)) {
+                Text("Approve", color = Color.White)
+            }
+            // Add the Reject button and its action if needed
+        }
     }
 }
 
@@ -38,48 +65,24 @@ fun NotificationList(viewModel: NotificationViewModel, paddingValues: PaddingVal
     val notifications by viewModel.notifications.collectAsState()
 
     Column(
-        modifier = Modifier
-            .padding(paddingValues) // Apply the paddingValues here
+        modifier = Modifier.padding(paddingValues)
     ) {
         notifications.forEach { notification ->
-            NotificationItem(notificationText = notification.message) // Modify as needed
+            NotificationItem(
+                notificationText = notification.message,
+                onApproveClicked = {
+                    viewModel.sendApprovalNotification(
+                        studentUserId = notification.userId,
+                        reportId = notification.relatedId,
+                        productName = notification.productName
+                    )
+                }
+            )
             Divider(color = Color.LightGray, thickness = 1.dp)
         }
     }
 }
 
-@Composable
-fun NotificationItem(notificationText: String) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(30.dp)
-    ) {
-        Text(notificationText)
-
-        Row(
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
-        ) {
-            Button(
-                onClick = { /* Handle approve action */ },
-                modifier = Modifier.weight(1f)
-            ) {
-                Text("Approve", color = Color.White)
-            }
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            Button(
-                onClick = { /* Handle reject action */ },
-                modifier = Modifier.weight(1f)
-            ) {
-                Text("Reject", color = Color.White)
-            }
-        }
-    }
-}
 
 @Preview(showBackground = true)
 @Composable

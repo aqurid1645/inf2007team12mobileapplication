@@ -5,6 +5,11 @@ import com.google.firebase.Timestamp
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.toObject
+import com.google.firebase.firestore.FirebaseFirestoreException
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.messaging.FirebaseMessaging
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.codescanner.GmsBarcodeScanner
 import com.inf2007team12mobileapplication.data.model.Loan
@@ -23,12 +28,30 @@ import kotlinx.coroutines.tasks.await
 import java.util.Calendar
 import java.util.UUID
 import javax.inject.Inject
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.suspendCoroutine
 
 class RepoImpt@Inject constructor(
     private val firebaseAuth: FirebaseAuth,
     private val scanner: GmsBarcodeScanner,
     private val firestore: FirebaseFirestore
+
 ) : Repo {
+
+    fun fetchProducts(): Flow<List<Product>> = callbackFlow {
+        val listenerRegistration = firestore.collection("products")
+            .addSnapshotListener { snapshot, e ->
+                if (e != null) {
+                    close(e) // Close the flow with an error
+                    return@addSnapshotListener
+                }
+                val products = snapshot?.documents?.mapNotNull { it.toObject(Product::class.java) }.orEmpty()
+                trySend(products) // Send the products list to the flow
+            }
+        awaitClose { listenerRegistration.remove() } // Remove the listener when the flow collector is done
+    }
 
 
     override fun loginUser(email: String, password: String): Flow<Resource<AuthResult>> {
@@ -110,6 +133,10 @@ class RepoImpt@Inject constructor(
             }
         }
     }
+
+
+
+
 
 
     private fun getDetails(barcode: Barcode): String {
@@ -205,7 +232,7 @@ class RepoImpt@Inject constructor(
                     Log.d("ProductData", "Product name: $productName")
                     Log.d("ProductStatusDebug", "${it.status},${it.productId},${it.productBarcodeID},${it.productDescription}")
 
-                        emit(Resource.Error("Product has already been borrowed."))
+                    emit(Resource.Error("Product has already been borrowed."))
                 }
                 "reserved" -> {
                     Log.d("ProductStatusDebug", "Product is reserved and cannot be borrowed at this time.")
@@ -256,7 +283,7 @@ class RepoImpt@Inject constructor(
         emit(Resource.Error(e.message ?: "An unknown error occurred"))
     }
 
-  override fun <T : Any> writeToFirestore(collectionName: String, dataModel: T, documentId: String?) {
+    override fun <T : Any> writeToFirestore(collectionName: String, dataModel: T, documentId: String?) {
         val firestoreInstance = FirebaseFirestore.getInstance()
         val documentReference = if (documentId != null) {
             firestoreInstance.collection(collectionName).document(documentId)
@@ -340,15 +367,15 @@ class RepoImpt@Inject constructor(
     }
 
     // Function to initiate a new loan
- /*   override fun createLoan(loan: Loan): Flow<Resource<Unit>> = flow {
-        emit(Resource.Loading())
+    /*   override fun createLoan(loan: Loan): Flow<Resource<Unit>> = flow {
+           emit(Resource.Loading())
 
-        val firestore = firestore.collection("loans").document().set(loan)
-        emit(Resource.Success(Unit))
-    }.catch { e ->
-        emit(Resource.Error(e.message ?: "An error occurred while creating the loan."))
-    }
-*/
+           val firestore = firestore.collection("loans").document().set(loan)
+           emit(Resource.Success(Unit))
+       }.catch { e ->
+           emit(Resource.Error(e.message ?: "An error occurred while creating the loan."))
+       }
+   */
 
     // Function to report a defective product
     override fun reportDefectiveProduct(defectReport: Report): Flow<Resource<Unit>> = flow {
@@ -404,4 +431,27 @@ class RepoImpt@Inject constructor(
     }.catch { e ->
         emit(Resource.Error(e.message ?: "An error occurred while fetching available products."))
     }
+
+    override fun getToken(): Flow<Resource<Unit>> = flow {
+        emit(Resource.Loading())
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: throw Exception("User not logged in")
+        try {
+            val token = suspendCancellableCoroutine<String> { continuation ->
+                FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        continuation.resume(task.result)
+                    } else {
+                        continuation.resumeWithException(task.exception ?: Exception("Failed to get FCM token"))
+                    }
+                }
+            }
+            // Explicitly specify the map type to match Firestore expectations
+            val data: Map<String, Any> = hashMapOf("fcmtoken" to token as Any)
+            firestore.collection("users").document(userId).update(data).await()
+            emit(Resource.Success(Unit))
+        } catch (e: Exception) {
+            emit(Resource.Error(e.message ?: "Error fetching FCM token"))
+        }
+    }
+
 }
