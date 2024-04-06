@@ -80,7 +80,7 @@ fun HomePageScreen(
                 // Replace with your navigation action if you have one
             }
             ActionButton(icon = Icons.Default.Search, text = "Search for a resource") {
-                navController.navigate("inventory")
+                navController.navigate("inventory/ ")
             }
             ActionButton(icon = Icons.AutoMirrored.Filled.List, text = "Items borrowed") {
                 // Replace with your navigation action if you have one

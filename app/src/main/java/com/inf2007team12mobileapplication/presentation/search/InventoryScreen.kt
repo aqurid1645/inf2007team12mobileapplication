@@ -20,12 +20,16 @@ import androidx.navigation.NavHostController
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
-fun InventoryScreen(productName: String, navController: NavHostController, viewModel: InventoryScreenViewModel = hiltViewModel()) {
+fun InventoryScreen(productName: String, navController: NavHostController, viewModel: InventoryScreenViewModel = hiltViewModel()
+) {
+
     var searchText by remember { mutableStateOf("") }
     val state = viewModel.state.collectAsState().value
 
+    if (productName.isNotBlank()) {
     LaunchedEffect(productName) {
-        viewModel.getProduct(productName)
+            viewModel.getProduct(productName)
+        }
     }
 
     Scaffold(
