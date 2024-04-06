@@ -3,13 +3,18 @@ package com.inf2007team12mobileapplication.presentation.profile
 
 import android.widget.Toast
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Button
@@ -18,10 +23,13 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -73,14 +81,44 @@ fun ProfileScreen(navController: NavController, viewModel: ProfileScreenViewMode
         var isEditingAnyField by remember { mutableStateOf(false) }
         val coroutineScope = rememberCoroutineScope()
 
-        Column(modifier = Modifier.padding(16.dp)) {
-            // ProfileInfoItem is a custom composable for displaying and editing profile info
-            ProfileInfoItem(label = "Name", value = name, onValueChange = { name = it }, onEditingChanged = { isEditingAnyField = it })
-            ProfileInfoItem(label = "Bio", value = bio, onValueChange = { bio = it }, onEditingChanged = { isEditingAnyField = it })
-            ProfileInfoItem(label = "Contact Number", value = contactNumber, validate = ::isValidSingaporeContact, onValueChange = { contactNumber = it }, onEditingChanged = { isEditingAnyField = it })
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState())
+        ) {
+            Text(
+                text = "Profile",
+                style = MaterialTheme.typography.headlineLarge,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+
+            ProfileInfoItem(
+                label = "Name",
+                value = name,
+                onValueChange = { name = it },
+                onEditingChanged = { isEditingAnyField = it }
+            )
+
+            ProfileInfoItem(
+                label = "Bio",
+                value = bio,
+                onValueChange = { bio = it },
+                onEditingChanged = { isEditingAnyField = it }
+            )
+
+            ProfileInfoItem(
+                label = "Contact Number",
+                value = contactNumber,
+                validate = ::isValidSingaporeContact,
+                onValueChange = { contactNumber = it },
+                onEditingChanged = { isEditingAnyField = it },
+                errorMessage = "Invalid contact number. Please use the +65 prefix followed by 8 digits."
+
+            )
             //RoleDropdown(role = role, onRoleSelected = { role = it }, expanded = expanded, onExpandedChange = { expanded = it }, roleOptions = roleOptions)
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             Button(
                 onClick = {
@@ -115,7 +153,7 @@ fun ProfileScreen(navController: NavController, viewModel: ProfileScreenViewMode
                 Text("Save Profile")
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             Button(onClick = {
                 navController.navigate("Camera") {
@@ -200,13 +238,16 @@ fun RoleDropdown(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileInfoItem(
     label: String,
     value: String,
     onValueChange: (String) -> Unit,
     validate: (String) -> Boolean = { true },
-    onEditingChanged: (Boolean) -> Unit // New parameter to report back editing state
+    onEditingChanged: (Boolean) -> Unit, // New parameter to report back editing state
+    errorMessage: String = "" // Add the errorMessage parameter with a default value
+
 ) {
     var editing by remember { mutableStateOf(false) }
     var text by remember { mutableStateOf(value) }
@@ -222,33 +263,63 @@ fun ProfileInfoItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp)
-            .clickable { editing = true }, // Apply clickable here to make the whole card clickable
-        elevation = CardDefaults.cardElevation(4.dp)
+            .padding(vertical = 8.dp)
+            .clickable { editing = true },
+        elevation = CardDefaults.cardElevation(4.dp),
+        shape = MaterialTheme.shapes.medium
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = label, style = MaterialTheme.typography.labelLarge)
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            )
             if (editing) {
                 OutlinedTextField(
                     value = text,
-                    onValueChange = {
-                        text = it // Update text regardless of validation
-                    },
+                    onValueChange = { text = it },
                     label = { Text(label) },
                     singleLine = true,
-                    isError = !validate(text) && text.isNotEmpty(), // Check validation but allow empty input for correction
-                    modifier = Modifier.fillMaxWidth()
+                    isError = !validate(text) && text.isNotEmpty(),
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+                    )
                 )
-                Button(onClick = {
-                    if (validate(text) || text.isEmpty()) { // Allow saving if valid or empty (assuming you want to allow clearing the field)
-                        onValueChange(text)
-                        editing = false
+                if (!validate(text) && text.isNotEmpty()) {
+                    Text(
+                        text = errorMessage,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.labelSmall,
+                        modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                    )
+                }
+                Row(
+                    modifier = Modifier.padding(top = 8.dp),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    TextButton(onClick = { editing = false }) {
+                        Text("Cancel")
                     }
-                }) {
-                    Text("Done")
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Button(
+                        onClick = {
+                            if (validate(text) || text.isEmpty()) {
+                                onValueChange(text)
+                                editing = false
+                            }
+                        }
+                    ) {
+                        Text("Save")
+                    }
                 }
             } else {
-                Text(text = value, style = MaterialTheme.typography.bodyLarge)
+                Text(
+                    text = value,
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
             }
         }
     }
