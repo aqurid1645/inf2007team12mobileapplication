@@ -41,6 +41,9 @@ fun HomePageScreen(
             TopAppBar(
                 title = { Text("Resources Management", fontWeight = FontWeight.Bold) },
                 actions = {
+                    IconButton(onClick = { /* Handle notification click */ }) {
+                        Icon(Icons.Default.Notifications, contentDescription = "Notifications", Modifier.size(30.dp))
+                    }
                     IconButton(onClick = {
 
                         navController.navigate("profile")
