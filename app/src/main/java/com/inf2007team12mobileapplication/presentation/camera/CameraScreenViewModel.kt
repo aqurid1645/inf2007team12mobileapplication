@@ -8,6 +8,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
@@ -34,16 +35,65 @@ class CameraScreenViewModel @Inject constructor(
     private fun onScanningResult(scannedProductId: String) {
         _state.value = _state.value.copy(
             showConfirmationDialog = true,
-            scannedProductId = scannedProductId
+            scannedProductBarcodeId = scannedProductId
         )
     }
-    fun addproducts(product: Product){
-        viewModelScope.launch{
-            repository.writeToFirestore("products", product,null)
+    // Streamlined to reduce redundancy and focus on functionality.
+    fun startAddingProduct() {
+        viewModelScope.launch {
+            repository.startScanning().collect { scannedBarcode ->
+                if (!scannedBarcode.isNullOrBlank()) {
+                    _state.value = _state.value.copy(
+                        showAddProductDialog = true, // Control showing the dialog in your UI
+                        scannedProductBarcodeId = scannedBarcode // Store scanned barcode ID
+                    )
+                } else {
+                    updateStateForError("Scanning failed or no barcode detected.")
+                }
+            }
         }
     }
+
+    // Enhanced for clarity and error handling.
+    fun submitNewProductDetails(productName: String, productDescription: String, productCategory: String, status: String) {
+        _state.value.scannedProductBarcodeId?.let { barcodeId ->
+            addProduct(Product(UUID.randomUUID().toString(), productName, productDescription, productCategory, status, barcodeId))
+        } ?: updateStateForError("No barcode scanned.")
+    }
+
+    // Refactored to handle loading and message updates more effectively.
+    fun addProduct(product: Product) {
+        // Indicate loading state before starting the repository operation
+        _state.value = _state.value.copy(isLoading = true)
+        viewModelScope.launch {
+            repository.writeToFirestoreflow("products", product, null).collect { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        // On success, update the state to hide the dialog and show a success message
+                        _state.value = _state.value.copy(
+                            showAddProductDialog = false, // Hide the add product dialog
+                            isLoading = false, // Loading is done
+                            message = "Product added successfully." // Show success message
+                        )
+                    }
+                    is Resource.Error -> {
+                        // On error, update the state to show an error message and stop loading
+                        _state.value = _state.value.copy(
+                            isLoading = false, // Loading is done
+                            errorMessage = "Failed to add product.", // Show error message
+                            showError = true // Indicate that there's an error
+                        )
+                    }
+                    is Resource.Loading -> {
+                        // Explicit handling of the loading state is not necessary here since it's set at the start
+                    }
+                }
+            }
+        }
+    }
+
     fun confirmBorrowing() {
-        val productId = _state.value.scannedProductId
+        val productId = _state.value.scannedProductBarcodeId
         if (productId != null) {
             viewModelScope.launch {
                 repository.checkAndUpdateProductStatus(productId).collect { resource ->
@@ -71,35 +121,27 @@ class CameraScreenViewModel @Inject constructor(
             updateStateForError("No product ID scanned.")
         }
     }
+    // Consolidated loading, success, and error state updates.
     private fun updateStateForLoading(message: String) {
-        _state.value = _state.value.copy(
-            details = message,
-            showConfirmationDialog = false, // Assuming you may want to hide the dialog during loading
-            scannedProductId = _state.value.scannedProductId, // Keep the scanned product ID
-            showError = false, // Reset the error state
-            errorMessage = "" // Clear any existing error messages
-        )
+        _state.value = _state.value.copy(isLoading = true, details = message)
     }
 
     private fun updateStateForSuccess(message: String) {
-        _state.value = _state.value.copy(details = message, showConfirmationDialog = false, scannedProductId = null, showError = false)
+        _state.value = _state.value.copy(isLoading = false, message = message, showError = false, errorMessage = "")
     }
 
     private fun updateStateForError(errorMessage: String) {
-        _state.value = _state.value.copy(errorMessage = errorMessage, showError = true, showConfirmationDialog = false)
+        _state.value = _state.value.copy(isLoading = false, message = null, showError = true, errorMessage = errorMessage)
     }
 
+    // Enhanced reset functionality to clear both messages and errors.
     fun resetDialog() {
-        _state.value = _state.value.copy(
-            showConfirmationDialog = false,
-            showLoanDetailsDialog = false,
-            loanDetails = null,
-            scannedProductId = null
-        )
+        _state.value = _state.value.copy(showConfirmationDialog = false, showLoanDetailsDialog = false, loanDetails = null, scannedProductBarcodeId = null, showAddProductDialog = false, message = null, errorMessage = "", showError = false)
     }
 
-
-    fun clearError() {
-        _state.value = _state.value.copy(showError = false, errorMessage = "")
+    // Added for explicitly clearing messages.
+    fun clearMessage() {
+        _state.value = _state.value.copy(message = null, errorMessage = "", showError = false)
     }
+
 }
