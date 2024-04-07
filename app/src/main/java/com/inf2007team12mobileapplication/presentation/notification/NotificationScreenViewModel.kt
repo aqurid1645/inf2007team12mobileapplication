@@ -15,6 +15,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import org.json.JSONObject
 import javax.inject.Inject
 
@@ -44,26 +45,38 @@ class NotificationViewModel @Inject constructor(
     }
 
     fun sendApprovalNotification(studentUserId: String, reportId: String, productName: String) {
-        Firebase.firestore.collection("users").document(studentUserId).get()
-            .addOnSuccessListener { documentSnapshot ->
-                val studentFcmToken = documentSnapshot.getString("fcmtoken")
-                studentFcmToken?.let {
-                    val notificationPayload = JSONObject().apply {
-                        put("to", it)
-                        put("notification", JSONObject().apply {
-                            put("title", "Report Approved")
-                            put("body", "Your report for $productName has been approved.")
-                        })
-                        put("data", JSONObject().apply {
-                            put("reportId", reportId)
-                            put("action", "approve")
-                        })
-                    }
+        viewModelScope.launch {
+            Firebase.firestore.collection("users").document(studentUserId).get()
+                .addOnSuccessListener { documentSnapshot ->
+                    val studentFcmToken = documentSnapshot.getString("fcmtoken")
+                    studentFcmToken?.let {
+                        val notificationPayload = JSONObject().apply {
+                            put("to", it)
+                            put("notification", JSONObject().apply {
+                                put("title", "Report Approved")
+                                put("body", "Your report for $productName has been approved.")
+                            })
+                            put("data", JSONObject().apply {
+                                put("reportId", reportId)
+                                put("action", "approve")
+                            })
+                        }
 
-                    sendNotification(notificationPayload)
-                }
+                        sendNotification(notificationPayload)
+                    }
+                }.await()
+
+            // After confirming the notification was sent successfully, update the list.
+            val updatedList = _notifications.value.filterNot {
+                it.notificationId == reportId && it.userId == studentUserId && it.productName == productName
             }
+
+            // Update the notifications list
+            _notifications.value = updatedList
+
+        }
     }
+
 
     private fun sendNotification(jsonObject: JSONObject) {
         val queue = Volley.newRequestQueue(getApplication())

@@ -97,11 +97,7 @@ class MainActivity : ComponentActivity() {
             MyAppTheme {
 
                 MainScreen()
-               /* if (notification != null) {
-                    NotificationScreen()
-                }else {
-                    MainScreen()
-                }*/
+
             }
         }
     }
@@ -111,9 +107,6 @@ class MainActivity : ComponentActivity() {
         val notification = intent.extras!!.getString("notification")
         setContent {
             MyAppTheme {
-              /*  if (notification != null) {
-                    NotificationScreen()
-                }*/
                 MainScreen()
             }
         }
