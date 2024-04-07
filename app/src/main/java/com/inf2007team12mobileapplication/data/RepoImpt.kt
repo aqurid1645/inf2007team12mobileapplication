@@ -32,6 +32,7 @@ import javax.inject.Inject
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.suspendCancellableCoroutine
+import java.util.Date
 import kotlin.coroutines.suspendCoroutine
 
 class RepoImpt@Inject constructor(
@@ -529,5 +530,29 @@ class RepoImpt@Inject constructor(
             emit(Resource.Error(e.message ?: "Error fetching FCM token"))
         }
     }
+    override suspend fun createDuplicateLoanWithNewEndDate(loanId: String, currentEndDate: Timestamp) {
+        val firestoreInstance = FirebaseFirestore.getInstance()
+        val loansCollection = firestoreInstance.collection("loans")
+        try {
+            // Fetch the original loan document
+            val originalLoanDocument = loansCollection.document(loanId).get().await()
+            val originalLoan = originalLoanDocument.toObject(Loan::class.java)
 
+            if (originalLoan != null) {
+                // Create a new Loan object by copying details from the original loan
+                val newLoan = originalLoan.copy(
+                    loanId = "", // Reset the loan ID, as it will be generated new upon document creation
+                    endDate = Timestamp(Date(currentEndDate.seconds * 1000 + 7889231400L)) // Calculate the new end date
+                )
+
+                // Add the new loan to the collection, auto-generating a new document ID
+                val newDocumentRef = loansCollection.document()
+                newLoan.loanId = newDocumentRef.id // Set the new loan ID to the new document's auto-generated ID
+
+                newDocumentRef.set(newLoan).await()
+            }
+        } catch (e: Exception) {
+            // Handle the error
+        }
+    }
 }

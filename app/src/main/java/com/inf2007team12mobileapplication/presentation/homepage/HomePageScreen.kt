@@ -89,7 +89,7 @@ fun HomePageScreen(
                 navController.navigate("Report") // Replace with your correct route
             }
             ActionButton(icon = Icons.Default.AccessTime, text = "Extend a loan") {
-                // Replace with your navigation action if you have one
+                navController.navigate("extension")
             }
             ActionButton(icon = Icons.Default.Search, text = "Search for a resource") {
                 navController.navigate("inventory/ ")

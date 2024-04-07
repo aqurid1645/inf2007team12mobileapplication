@@ -7,6 +7,8 @@ import com.inf2007team12mobileapplication.data.model.Product
 import com.inf2007team12mobileapplication.data.model.Report
 import com.inf2007team12mobileapplication.data.model.UserProfile
 import kotlinx.coroutines.flow.Flow
+import com.google.firebase.Timestamp
+
 
 interface Repo {
     fun loginUser(email:String,password:String):Flow<Resource<AuthResult>>
@@ -30,6 +32,7 @@ interface Repo {
     fun reportDefectiveProduct(defectReport: Report): Flow<Resource<Unit>>
     fun fetchNotificationsForLecturer(lecturerId: String): Flow<Resource<List<Notification>>>
     fun fetchProduct(product:String): Flow<Resource<String>>
+    suspend fun createDuplicateLoanWithNewEndDate(userId: String, newEndDate: Timestamp)
 
     fun getToken(): Flow<Resource<Unit>>
 

@@ -6,7 +6,7 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 
 data class Loan(
-    val loanId: String = "",
+    var loanId: String = "",
     val userId: String = "",
     val productId: String = "",
     val productCategory: String = "",

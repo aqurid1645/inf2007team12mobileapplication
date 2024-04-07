@@ -37,6 +37,7 @@ import androidx.navigation.navArgument
 import com.google.android.gms.common.util.CollectionUtils.listOf
 import com.google.firebase.FirebaseApp
 import com.inf2007team12mobileapplication.presentation.camera.CameraScreen
+import com.inf2007team12mobileapplication.presentation.extension.ExtensionScreen
 import com.inf2007team12mobileapplication.presentation.homepage.HomePageScreen
 import com.inf2007team12mobileapplication.presentation.lecturerrecord.LecturerLoanScreen
 import com.inf2007team12mobileapplication.presentation.login.SignInScreen
@@ -187,7 +188,7 @@ fun MainScreen() {
                 InventoryScreen(productName, navController)
             }
             composable(Screen.ProductCatalog.route) { ProductCatalogScreen(navController) }
-
+            composable(Screen.Extension.route) { ExtensionScreen(navController) }
             composable(Screen.LecturerLoan.route) { LecturerLoanScreen(navController) }
             composable(Screen.NotificationScreen.route) { NotificationScreen(navController) }
 
