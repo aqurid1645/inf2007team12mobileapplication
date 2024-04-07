@@ -15,11 +15,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -42,7 +47,6 @@ import androidx.navigation.NavController
 import com.inf2007team12mobileapplication.data.model.UserProfile
 import kotlinx.coroutines.launch
 
-
 @Composable
 fun ProfileScreen(
     navController: NavController,
@@ -52,9 +56,7 @@ fun ProfileScreen(
     val currentUserId by viewModel.currentUserId.collectAsState(initial = null)
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
-    var studentID by remember { mutableStateOf("") } // Add this line
-    var name by remember { mutableStateOf("") }
-    var bio by remember { mutableStateOf("") }
+
     var isEditingName by remember { mutableStateOf(false) }
     var isEditingBio by remember { mutableStateOf(false) }
     var isEditingStudentID by remember { mutableStateOf(false) }
@@ -66,97 +68,119 @@ fun ProfileScreen(
     }
 
     userProfile?.let { profile ->
-        name = profile.name
-        bio = profile.bio
-        studentID = profile.studentID
-    }
+        var name by remember { mutableStateOf(profile.name) }
+        var bio by remember { mutableStateOf(profile.bio) }
+        var studentID by remember { mutableStateOf(profile.studentID) }
+        var role by remember { mutableStateOf(profile.role) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState())
-    ) {
-        Text(
-            text = "Welcome $name",
-            style = MaterialTheme.typography.headlineLarge,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
 
-        ProfileInfoItem(
-            label = "Name",
-            value = name,
-            onValueChange = { updatedValue ->
-                name = updatedValue
-            },
-            isEditing = isEditingName,
-            onEditingChanged = { isEditingName = it }
-        )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState())
+        ) {
+            Text(
+                text = "Welcome $name",
+                style = MaterialTheme.typography.headlineLarge,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
 
-        ProfileInfoItem(
-            label = "Bio",
-            value = bio,
-            onValueChange = { updatedValue ->
-                bio = updatedValue
-            },
-            isEditing = isEditingBio,
-            onEditingChanged = { isEditingBio = it }
-        )
+            ProfileInfoItem(
+                label = "Name",
+                value = name,
+                onValueChange = {
+                    name = it
+                },
+                isEditing = isEditingName,
+                onEditingChanged = { isEditingName = it }
+            )
 
-        ProfileInfoItem(
-            label = "Student ID",
-            value = studentID,
-            onValueChange = { updatedValue -> studentID = updatedValue },
-            isEditing = isEditingStudentID,
-            onEditingChanged = { isEditing -> isEditingStudentID = isEditing }
-        )
+            ProfileInfoItem(
+                label = "Bio",
+                value = bio,
+                onValueChange = { updatedValue ->
+                    bio = updatedValue
+                },
+                isEditing = isEditingBio,
+                onEditingChanged = { isEditingBio = it }
+            )
 
-        Spacer(modifier = Modifier.height(16.dp))
+            ProfileInfoItem(
+                label = "Student ID",
+                value = studentID,
+                onValueChange = { updatedValue -> studentID = updatedValue },
+                isEditing = isEditingStudentID,
+                onEditingChanged = { isEditing -> isEditingStudentID = isEditing }
+            )
 
-        Button(
-            onClick = {
-                coroutineScope.launch {
-                    if (!isEditingName && !isEditingBio) {
-                        viewModel.updateUserProfile(viewModel.getCurrentUserId(),
-                            UserProfile(name, studentID,bio)
-                        ) {
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = {
+                    coroutineScope.launch {
+                        if (!isEditingName && !isEditingBio) {
+                            currentUserId?.let {
+                                viewModel.updateUserProfile(
+                                    it,
+                                    UserProfile(name, studentID, bio,role)
+                                ) {
+                                    Toast.makeText(
+                                        context,
+                                        "Profile updated successfully",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            }
+                        } else {
                             Toast.makeText(
                                 context,
-                                "Profile updated successfully",
+                                "Please finish editing before saving.",
                                 Toast.LENGTH_SHORT
                             ).show()
                         }
-                    } else {
-                        Toast.makeText(
-                            context,
-                            "Please finish editing before saving.",
-                            Toast.LENGTH_SHORT
-                        ).show()
                     }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !isEditingName && !isEditingBio && userProfile != null
+            ) {
+                Text("Save Profile")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                Button(
+                    onClick = {
+                        navController.navigate("resetpassword") {
+                        }
+                    },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(Icons.Filled.Lock, contentDescription = "Reset Password")
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Reset Password")
                 }
-            },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = !isEditingName && !isEditingBio && userProfile != null
-        ) {
-            Text("Save Profile")
-        }
 
-        Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.width(16.dp))
 
-        Button(onClick = {
-            navController.navigate("resetpassword") {
+                Button(
+                    onClick = {
+                        viewModel.signout()
+                        navController.navigate("signin") {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = "Logout")
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Logout")
+                }
             }
-        }) {
-            Text("Reset Password")
-        }
-
-        Button(onClick = {
-            viewModel.signout()
-            navController.navigate("signin") {
-                popUpTo(0) { inclusive = true }
-            }
-        }) {
-            Text("Logout")
         }
     }
 

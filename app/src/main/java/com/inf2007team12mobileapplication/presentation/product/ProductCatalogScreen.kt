@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -37,7 +38,7 @@ fun ProductCatalogScreen(
                 // Define what happens when you click 'Start borrowing'
                 // For example, you might navigate to a product detail screen:
                 // navController.navigate("productDetail/${product.id}")
-                navController.navigate("Camera")
+                navController.navigate("Camera?fromProductCatalog=true")
 
             }, onSearchClick = {
                 // Define what happens when you click 'Search'
@@ -92,7 +93,12 @@ fun ProductCard(
                     modifier = Modifier
                         .weight(1f)
                         .padding(end = 8.dp)
-                ) {
+                ) {Icon(
+                    imageVector = Icons.Default.CameraAlt,
+                    contentDescription = "Search Icon",
+                    modifier = Modifier.size(18.dp)
+                )
+
                     Text("Borrow", modifier = Modifier.padding(8.dp))
                 }
                 Button(

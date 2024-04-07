@@ -16,7 +16,7 @@ interface Repo {
     fun getuseremail():String?
     fun signout()
     fun fetchUserProfile(userId: String): Flow<Resource<UserProfile>>
-    fun updateUserProfile(userId: Unit, userProfile: UserProfile): Flow<Resource<Unit>>
+    fun updateUserProfile(userId: String, userProfile: UserProfile): Flow<Resource<Unit>>
 
     fun startScanning(): Flow<String?>
     fun getCurrentUserId(): String

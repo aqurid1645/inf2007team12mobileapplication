@@ -233,10 +233,10 @@ class RepoImpt@Inject constructor(
         }
     }
 
-    override fun updateUserProfile(userId: Unit, userProfile: UserProfile): Flow<Resource<Unit>> = flow {
+    override fun updateUserProfile(userId: String, userProfile: UserProfile): Flow<Resource<Unit>> = flow {
         try {
             emit(Resource.Loading())
-            firestore.collection("users").document().set(userProfile).await()
+            firestore.collection("users").document(userId).set(userProfile).await()
             emit(Resource.Success(Unit))
         } catch (e: Exception) {
             emit(Resource.Error(e.message ?: "Error updating user profile"))

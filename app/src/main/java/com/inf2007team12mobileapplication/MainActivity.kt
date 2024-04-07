@@ -155,7 +155,18 @@ fun MainScreen() {
             composable(Screen.SignUp.route) { SignUpScreen(navController) }
             composable(Screen.SignIn.route) { SignInScreen(navController) }
             composable(Screen.Profile.route) { ProfileScreen(navController) }
-            composable(Screen.Camera.route) { CameraScreen(navController) }
+            composable(
+                route = Screen.Camera.route + "?fromProductCatalog={fromProductCatalog}",
+                arguments = listOf(
+                    navArgument("fromProductCatalog") {
+                        type = NavType.BoolType
+                        defaultValue = false
+                    }
+                )
+            ) { backStackEntry ->
+                val fromProductCatalog = backStackEntry.arguments?.getBoolean("fromProductCatalog") ?: false
+                CameraScreen(navController, fromProductCatalog)
+            }
             composable(Screen.ResetPassword.route) { ChangePasswordScreen(navController) }
             composable(Screen.Report.route) { ReportScreen(navController) }
             composable(Screen.Home.route) { HomePageScreen(navController) }

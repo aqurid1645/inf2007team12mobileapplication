@@ -57,10 +57,18 @@ class ProfileScreenViewModel @Inject constructor(private val repository: Repo) :
     }
 
 
-    fun updateUserProfile(userId: Unit, userProfile: UserProfile, function: () -> Unit) {
+    fun updateUserProfile(userId: String, userProfile: UserProfile, onSuccess: () -> Unit) {
         viewModelScope.launch {
             repository.updateUserProfile(userId, userProfile).collect { result ->
-                // Handle success or error
+                when (result) {
+                    is Resource.Success -> onSuccess()
+                    is Resource.Error -> {
+                        // Handle error case
+                    }
+                    is Resource.Loading -> {
+                        // Handle loading case
+                    }
+                }
             }
         }
     }
