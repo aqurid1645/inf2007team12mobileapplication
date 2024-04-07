@@ -88,8 +88,10 @@ fun HomePageScreen(
             ActionButton(icon = Icons.Default.ReportProblem, text = "Report a defect") {
                 navController.navigate("Report") // Replace with your correct route
             }
-            ActionButton(icon = Icons.Default.AccessTime, text = "Extend a loan") {
-                navController.navigate("extension")
+            if (userRoleStatus is Resource.Success && userRoleStatus.data == "student") {
+                ActionButton(icon = Icons.Default.AccessTime, text = "Extend a loan") {
+                    navController.navigate("extension")
+                }
             }
             ActionButton(icon = Icons.Default.Search, text = "Search for a resource") {
                 navController.navigate("inventory/ ")
