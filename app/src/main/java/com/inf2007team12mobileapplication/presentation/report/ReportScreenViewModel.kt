@@ -63,27 +63,12 @@ class ReportScreenViewModel @Inject constructor(
         fetchUserLoans()
     }
 
-//    fun fetchUserLoans() {
-//        val userId = getCurrentUserId()
-//        viewModelScope.launch {
-//            repository.getUserLoans(userId).collect { resource ->
-//                _loans.value = resource
-//            }
-//        }
-//    }
-
-    //    weiwen
-//    Mock fetchUserLoans
     fun fetchUserLoans() {
+        val userId = getCurrentUserId()
         viewModelScope.launch {
-            val mockLoans = List(10) { index -> // Generate 10 Loan objects
-                Loan(
-                    loanId = UUID.randomUUID().toString(), // Generate unique ID
-                    productName = "Mock Product ${index + 1}",
-                    productBarcodeID = (12345 + index).toString() // Just an example to differentiate productBarcodeID
-                )
+            repository.getUserLoans(userId).collect { resource ->
+                _loans.value = resource
             }
-            _loans.value = Resource.Success(mockLoans)
         }
     }
 
