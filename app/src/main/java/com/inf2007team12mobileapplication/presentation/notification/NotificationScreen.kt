@@ -2,6 +2,8 @@ package com.inf2007team12mobileapplication.presentation.notification
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
@@ -27,14 +29,16 @@ fun NotificationScreen(navController: NavController, viewModel: NotificationView
         topBar = { TopAppBar(title = { Text("Notifications", fontWeight = FontWeight.Bold) }) }
     ) { paddingValues ->
         val notifications by viewModel.notifications.collectAsState()
-
-        Column(modifier = Modifier.padding(paddingValues)) {
-            notifications.forEach { notification ->
+        LazyColumn(contentPadding = paddingValues) {
+            items(notifications, key = { it.notificationId }) { notification ->
                 NotificationItem(
                     notificationText = notification.message,
                     onApproveClicked = {
-                        // Assuming you have access to the necessary data
-                        viewModel.sendApprovalNotification(studentUserId = notification.userId, reportId = notification.relatedId, productName = notification.productName)
+                        viewModel.sendApprovalNotification(
+                            studentUserId = notification.userId,
+                            reportId = notification.relatedId,
+                            productName = notification.productName
+                        )
                     }
                 )
                 Divider(color = Color.LightGray, thickness = 1.dp)
@@ -45,6 +49,8 @@ fun NotificationScreen(navController: NavController, viewModel: NotificationView
 
 @Composable
 fun NotificationItem(notificationText: String, onApproveClicked: () -> Unit) {
+    var approvalSent by remember { mutableStateOf(false) }
+
     Column(modifier = Modifier.fillMaxWidth().padding(30.dp)) {
         Text(notificationText)
 
@@ -53,13 +59,20 @@ fun NotificationItem(notificationText: String, onApproveClicked: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
         ) {
-            Button(onClick = onApproveClicked, modifier = Modifier.weight(1f)) {
-                Text("Approve", color = Color.White)
+            if (!approvalSent) {
+                Button(onClick = {
+                    onApproveClicked()
+                    approvalSent = true
+                }, modifier = Modifier.weight(1f)) {
+                    Text("Approve", color = Color.White)
+                }
+            } else {
+                Text("Approval has been sent to student", modifier = Modifier.weight(1f), color = Color.Green)
             }
-            // Add the Reject button and its action if needed
         }
     }
 }
+
 
 @Composable
 fun NotificationList(viewModel: NotificationViewModel, paddingValues: PaddingValues) {
