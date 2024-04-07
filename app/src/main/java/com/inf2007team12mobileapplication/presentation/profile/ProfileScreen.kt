@@ -72,6 +72,7 @@ fun ProfileScreen(
         var bio by remember { mutableStateOf(profile.bio) }
         var studentID by remember { mutableStateOf(profile.studentID) }
         var role by remember { mutableStateOf(profile.role) }
+        var fcm by remember { mutableStateOf(profile.fcmtoken) }
 
 
         Column(
@@ -123,7 +124,7 @@ fun ProfileScreen(
                             currentUserId?.let {
                                 viewModel.updateUserProfile(
                                     it,
-                                    UserProfile(name, studentID, bio,role)
+                                    UserProfile(name, studentID, bio,role,fcm)
                                 ) {
                                     Toast.makeText(
                                         context,
@@ -250,7 +251,7 @@ fun ProfileInfoItem(
                             onEditingChanged(false)
                         }
                     ) {
-                        Text("Save")
+                        Text("Ok")
                     }
                 }
             } else {
