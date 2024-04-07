@@ -70,7 +70,7 @@ fun ReportScreen(navController: NavController, viewModel: ReportScreenViewModel 
                 .padding(paddingValues)
                 .padding(16.dp)
         ) {
-            Text("Report a Problem")
+            Text("Report a Problem", style = MaterialTheme.typography.headlineLarge)
             Spacer(modifier = Modifier.height(8.dp))
 
             ProblemTypeDropdownMenu(problemType) { selectedType ->

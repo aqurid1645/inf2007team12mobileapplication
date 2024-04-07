@@ -5,16 +5,19 @@ import com.inf2007team12mobileapplication.data.model.Loan
 import com.inf2007team12mobileapplication.data.model.Notification
 import com.inf2007team12mobileapplication.data.model.Product
 import com.inf2007team12mobileapplication.data.model.Report
+import com.inf2007team12mobileapplication.data.model.UserProfile
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 
 interface Repo {
     fun loginUser(email:String,password:String):Flow<Resource<AuthResult>>
     fun registerUser(email:String,password: String):Flow<Resource<AuthResult>>
     fun registerUserWithRole(email: String, password: String, role: String): Flow<Resource<AuthResult>>
-
+    fun fetchUserRole(): Flow<Resource<String>>
     fun getuseremail():String?
     fun signout()
+    fun fetchUserProfile(userId: String): Flow<Resource<UserProfile>>
+    fun updateUserProfile(userId: Unit, userProfile: UserProfile): Flow<Resource<Unit>>
+
     fun startScanning(): Flow<String?>
     fun getCurrentUserId(): String
     fun checkAndUpdateProductStatus(productId: String): Flow<Resource<String>>

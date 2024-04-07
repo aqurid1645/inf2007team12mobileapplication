@@ -2,13 +2,15 @@ package com.inf2007team12mobileapplication.presentation.camera
 
 data class CameraScreenState(
     val showConfirmationDialog: Boolean = false,
-    val scannedProductId: String? = null,
-    val scannedProductName: String? = null, // Add this line
+    val scannedProductBarcodeId: String? = null,
     val showError: Boolean = false,
     val errorMessage: String = "",
     val details: String = "",
     val showLoanDetailsDialog: Boolean = false,
-    val loanDetails: String? = null
+    val loanDetails: String? = null,
+    val showAddProductDialog: Boolean = false,
+    val isLoading: Boolean = false,
+    val message: String? = null,
 
 )
 

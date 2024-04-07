@@ -16,6 +16,7 @@ import com.inf2007team12mobileapplication.data.model.Loan
 import com.inf2007team12mobileapplication.data.model.Notification
 import com.inf2007team12mobileapplication.data.model.Product
 import com.inf2007team12mobileapplication.data.model.Report
+import com.inf2007team12mobileapplication.data.model.UserProfile
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
@@ -137,6 +138,24 @@ class RepoImpt@Inject constructor(
 
 
 
+    override fun fetchUserRole(): Flow<Resource<String>> = flow {
+        emit(Resource.Loading())
+
+        val userId = getCurrentUserId()
+        if (userId.isBlank()) {
+            emit(Resource.Error("No user logged in."))
+            return@flow
+        }
+
+        try {
+            val documentSnapshot = firestore.collection("users").document(userId).get().await()
+            val role = documentSnapshot.getString("role") ?: "Unknown"
+            emit(Resource.Success(role))
+        } catch (e: Exception) {
+            emit(Resource.Error(e.message ?: "An error occurred while fetching the user role."))
+        }
+    }
+
 
 
     private fun getDetails(barcode: Barcode): String {
@@ -201,6 +220,29 @@ class RepoImpt@Inject constructor(
             }
         }
     }
+    override fun fetchUserProfile(userId: String): Flow<Resource<UserProfile>> = flow {
+        try {
+            emit(Resource.Loading())
+            val documentSnapshot = firestore.collection("users").document(userId).get().await()
+            val userProfile = documentSnapshot.toObject(UserProfile::class.java)
+            userProfile?.let {
+                emit(Resource.Success(it))
+            } ?: emit(Resource.Error("User profile not found"))
+        } catch (e: Exception) {
+            emit(Resource.Error(e.message ?: "Error fetching user profile"))
+        }
+    }
+
+    override fun updateUserProfile(userId: Unit, userProfile: UserProfile): Flow<Resource<Unit>> = flow {
+        try {
+            emit(Resource.Loading())
+            firestore.collection("users").document().set(userProfile).await()
+            emit(Resource.Success(Unit))
+        } catch (e: Exception) {
+            emit(Resource.Error(e.message ?: "Error updating user profile"))
+        }
+    }
+
 
     override fun checkAndUpdateProductStatus(productbarcodeId: String): Flow<Resource<String>> = flow {
         emit(Resource.Loading())

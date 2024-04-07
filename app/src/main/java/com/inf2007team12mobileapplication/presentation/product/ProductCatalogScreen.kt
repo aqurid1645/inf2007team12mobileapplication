@@ -19,6 +19,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.compose.runtime.livedata.observeAsState
 import com.inf2007team12mobileapplication.R
+import com.inf2007team12mobileapplication.data.model.Product
 
 @Composable
 fun ProductCatalogScreen(
@@ -36,7 +37,7 @@ fun ProductCatalogScreen(
                 // Define what happens when you click 'Start borrowing'
                 // For example, you might navigate to a product detail screen:
                 // navController.navigate("productDetail/${product.id}")
-                navController.navigate("camera")
+                navController.navigate("Camera")
 
             }, onSearchClick = {
                 // Define what happens when you click 'Search'
@@ -50,7 +51,7 @@ fun ProductCatalogScreen(
 
 @Composable
 fun ProductCard(
-    product: ProductCatalog,
+    product: Product,
     onBorrowClick: () -> Unit,
     onSearchClick: () -> Unit
 ) {
