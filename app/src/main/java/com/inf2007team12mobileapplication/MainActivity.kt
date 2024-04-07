@@ -15,11 +15,11 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
@@ -38,6 +38,7 @@ import com.google.android.gms.common.util.CollectionUtils.listOf
 import com.google.firebase.FirebaseApp
 import com.inf2007team12mobileapplication.presentation.camera.CameraScreen
 import com.inf2007team12mobileapplication.presentation.homepage.HomePageScreen
+import com.inf2007team12mobileapplication.presentation.lecturerrecord.LecturerLoanScreen
 import com.inf2007team12mobileapplication.presentation.login.SignInScreen
 import com.inf2007team12mobileapplication.presentation.notification.NotificationScreen
 import com.inf2007team12mobileapplication.presentation.product.ProductCatalogScreen
@@ -47,6 +48,7 @@ import com.inf2007team12mobileapplication.presentation.report.ReportScreen
 import com.inf2007team12mobileapplication.presentation.search.InventoryScreen
 import com.inf2007team12mobileapplication.presentation.signup.SignUpScreen
 import dagger.hilt.android.AndroidEntryPoint
+import androidx.compose.material3.Scaffold as Scaffold
 
 
 @AndroidEntryPoint
@@ -92,11 +94,13 @@ class MainActivity : ComponentActivity() {
         }
         setContent {
             MyAppTheme {
-                if (notification != null) {
+
+                MainScreen()
+               /* if (notification != null) {
                     NotificationScreen()
                 }else {
                     MainScreen()
-                }
+                }*/
             }
         }
     }
@@ -106,9 +110,10 @@ class MainActivity : ComponentActivity() {
         val notification = intent.extras!!.getString("notification")
         setContent {
             MyAppTheme {
-                if (notification != null) {
+              /*  if (notification != null) {
                     NotificationScreen()
-                }
+                }*/
+                MainScreen()
             }
         }
     }
@@ -145,13 +150,17 @@ fun MainScreen() {
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
 
     Scaffold(
-        bottomBar = {
-            if (currentRoute !in hideBottomBarRoutes) {
-                BottomNavigationBar(navController, screensWithIcons)
+            bottomBar = {
+                if (currentRoute !in hideBottomBarRoutes) {
+                    BottomNavigationBar(navController, screensWithIcons)
+                }
             }
-        }
-    ) {
-        NavHost(navController = navController, startDestination = Screen.SignIn.route) {
+            ) { innerPadding -> // `innerPadding` provides the padding values from the Scaffold, including the bottom bar.
+        NavHost(
+            navController = navController,
+            startDestination = Screen.SignIn.route,
+            modifier = Modifier.padding(innerPadding) // Apply the provided padding to the NavHost.
+        ){
             composable(Screen.SignUp.route) { SignUpScreen(navController) }
             composable(Screen.SignIn.route) { SignInScreen(navController) }
             composable(Screen.Profile.route) { ProfileScreen(navController) }
@@ -178,6 +187,10 @@ fun MainScreen() {
                 InventoryScreen(productName, navController)
             }
             composable(Screen.ProductCatalog.route) { ProductCatalogScreen(navController) }
+
+            composable(Screen.LecturerLoan.route) { LecturerLoanScreen(navController) }
+            composable(Screen.NotificationScreen.route) { NotificationScreen(navController) }
+
 
             // Define other composable screens here
         }

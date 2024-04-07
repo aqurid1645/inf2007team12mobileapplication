@@ -21,6 +21,7 @@ sealed class Screen(val route: String, val icon: ImageVector? = null) {
     object Home : Screen("Home", Icons.Default.Home)
     object Inventory : Screen("inventory", Icons.Default.Search)
 
+    object LecturerLoan : Screen("LecturerLoan", Icons.Default.Search)
 
     object ProductCatalog: Screen("Catalog",Icons.AutoMirrored.Filled.ViewList)
 

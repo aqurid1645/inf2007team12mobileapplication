@@ -17,11 +17,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NotificationScreen(viewModel: NotificationViewModel = hiltViewModel()) {
+fun NotificationScreen(navController: NavController, viewModel: NotificationViewModel = hiltViewModel()) {
     Scaffold(
         topBar = { TopAppBar(title = { Text("Notifications", fontWeight = FontWeight.Bold) }) }
     ) { paddingValues ->
@@ -83,9 +84,3 @@ fun NotificationList(viewModel: NotificationViewModel, paddingValues: PaddingVal
     }
 }
 
-
-@Preview(showBackground = true)
-@Composable
-fun NotificationScreenPreview() {
-    NotificationScreen()
-}

@@ -108,7 +108,7 @@ fun ProfileScreen(
             )
 
             ProfileInfoItem(
-                label = "Student ID",
+                label = "University ID (Student/Lecturer)",
                 value = studentID,
                 onValueChange = { updatedValue -> studentID = updatedValue },
                 isEditing = isEditingStudentID,

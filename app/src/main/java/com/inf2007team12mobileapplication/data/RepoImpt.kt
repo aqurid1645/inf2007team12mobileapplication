@@ -135,6 +135,40 @@ class RepoImpt@Inject constructor(
         }
     }
 
+    override fun fetchLoansByStudentID(studentId: String): Flow<Resource<List<Loan>>> = flow {
+        Log.d("LoanSearch", "Fetching loans for student ID: $studentId")
+        emit(Resource.Loading())
+
+        try {
+            // First, find the user ID based on student ID
+            val userQuerySnapshot = firestore.collection("users")
+                .whereEqualTo("studentID", studentId)
+                .get()
+                .await()
+            Log.d("LoanSearch", "User query completed. Found: ${userQuerySnapshot.documents.size} users")
+
+            if (userQuerySnapshot.documents.isNotEmpty()) {
+                val userId = userQuerySnapshot.documents.first().id
+                Log.d("LoanSearch", "User ID: $userId found, fetching loans...")
+
+                // Now, fetch loans based on user ID
+                val loansSnapshot = firestore.collection("loans")
+                    .whereEqualTo("userId", userId)
+                    .get()
+                    .await()
+                val loans = loansSnapshot.toObjects(Loan::class.java)
+                Log.d("LoanSearch", "Loans fetch completed. Found: ${loans.size} loans")
+
+                emit(Resource.Success(loans))
+            } else {
+                Log.d("LoanSearch", "No user found with the provided student ID.")
+                emit(Resource.Error("No user found with the provided student ID."))
+            }
+        } catch (e: Exception) {
+            Log.e("LoanSearch", "Failed to fetch loans: ${e.message}", e)
+            emit(Resource.Error("Failed to fetch loans: ${e.message}"))
+        }
+    }
 
 
 

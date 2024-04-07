@@ -25,15 +25,25 @@ class HomePageViewModel @Inject constructor(
     private val _tokenUpdateStatus = MutableStateFlow<Resource<Unit>>(Resource.Loading())
     val tokenUpdateStatus: StateFlow<Resource<Unit>> = _tokenUpdateStatus
 
+    private val _userRole = MutableStateFlow<Resource<String>>(Resource.Loading())
+    val userRole: StateFlow<Resource<String>> = _userRole
+
     init {
         getToken()
+        fetchUserRole()
     }
-
     private fun getToken() {
         viewModelScope.launch {
             repo.getToken().collect { status ->
                 _tokenUpdateStatus.value = status
             }
         }
+    }
+        private fun fetchUserRole() {
+            viewModelScope.launch {
+                repo.fetchUserRole().collect { role ->
+                    _userRole.value = role
+                }
+            }
     }
 }

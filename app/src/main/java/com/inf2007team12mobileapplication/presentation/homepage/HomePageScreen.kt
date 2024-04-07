@@ -38,14 +38,16 @@ fun HomePageScreen(
 
     // Observe the token update status
     viewModel.tokenUpdateStatus.collectAsState().value
-
+    val userRoleStatus = viewModel.userRole.collectAsState().value
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Resources Management", fontWeight = FontWeight.Bold) },
                 actions = {
-                    IconButton(onClick = { /* Handle notification click */ }) {
-                        Icon(Icons.Default.Notifications, contentDescription = "Notifications", Modifier.size(30.dp))
+                    if (userRoleStatus is Resource.Success && ( userRoleStatus.data == "lecturer")) {
+                        IconButton(onClick = { navController.navigate("notification") }) {
+                            Icon(Icons.Default.Notifications, contentDescription = "Notifications", Modifier.size(30.dp))
+                        }
                     }
                     IconButton(onClick = {
 
@@ -89,8 +91,11 @@ fun HomePageScreen(
             ActionButton(icon = Icons.Default.Search, text = "Search for a resource") {
                 navController.navigate("inventory/ ")
             }
-            ActionButton(icon = Icons.AutoMirrored.Filled.List, text = "Items borrowed") {
-                // Replace with your navigation action if you have one
+
+            if (userRoleStatus is Resource.Success && userRoleStatus.data == "lecturer") {
+                ActionButton(icon = Icons.Default.Person, text = "Lecturer Loan") {
+                    navController.navigate("LecturerLoan")
+                }
             }
             ActionButton(icon = Icons.AutoMirrored.Filled.ViewList, text = "Product Catalog") {
                 navController.navigate("Catalog")
