@@ -1,4 +1,4 @@
-package com.inf2007team12mobileapplication.presentation.camera
+package com.inf2007team12mobileapplication.data.model
 
 data class CameraScreenState(
     val showConfirmationDialog: Boolean = false,

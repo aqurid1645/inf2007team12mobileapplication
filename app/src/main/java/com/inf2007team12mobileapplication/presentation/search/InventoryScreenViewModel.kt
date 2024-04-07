@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.inf2007team12mobileapplication.data.Repo
 import com.inf2007team12mobileapplication.data.Resource
+import com.inf2007team12mobileapplication.data.model.InventoryScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
