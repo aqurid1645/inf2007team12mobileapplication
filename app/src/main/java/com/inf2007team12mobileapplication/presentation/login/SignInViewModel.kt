@@ -1,19 +1,14 @@
 package com.inf2007team12mobileapplication.presentation.login
 
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-
-import com.google.firebase.auth.AuthCredential
+import com.inf2007team12mobileapplication.data.Repo
 import com.inf2007team12mobileapplication.data.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import com.inf2007team12mobileapplication.data.Repo
 
 @HiltViewModel
 class SignInViewModel @Inject constructor(
@@ -40,4 +35,11 @@ class SignInViewModel @Inject constructor(
 
         }
     }
+/*    fun checkUserProfileExists(userId: String, onExists: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            repository.checkUserProfileExists(userId).collect { exists ->
+                onExists(exists)
+            }
+        }
+    }*/
 }

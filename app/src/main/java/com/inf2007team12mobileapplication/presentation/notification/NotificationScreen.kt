@@ -16,46 +16,36 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NotificationScreen() {
+fun NotificationScreen(navController: NavController, viewModel: NotificationViewModel = hiltViewModel()) {
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Notification", fontWeight = FontWeight.Bold) }
-            )
-        }
-    ) {
-        NotificationList()
-    }
-}
+        topBar = { TopAppBar(title = { Text("Notifications", fontWeight = FontWeight.Bold) }) }
+    ) { paddingValues ->
+        val notifications by viewModel.notifications.collectAsState()
 
-@Composable
-fun NotificationList() {
-    // Replace this with your actual data source
-    val notifications = listOf(
-        "Student A requested an exchange due to defective equipment 456",
-        "Student B requested an extension of equipment 123",
-        "Student C requested an exchange due to defective equipment 978"
-    )
-
-    Column {
-        notifications.forEach { notification ->
-            NotificationItem(notificationText = notification)
-            Divider(color = Color.LightGray, thickness = 1.dp)
+        Column(modifier = Modifier.padding(paddingValues)) {
+            notifications.forEach { notification ->
+                NotificationItem(
+                    notificationText = notification.message,
+                    onApproveClicked = {
+                        // Assuming you have access to the necessary data
+                        viewModel.sendApprovalNotification(studentUserId = notification.userId, reportId = notification.relatedId, productName = notification.productName)
+                    }
+                )
+                Divider(color = Color.LightGray, thickness = 1.dp)
+            }
         }
     }
 }
 
 @Composable
-fun NotificationItem(notificationText: String) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-    ) {
+fun NotificationItem(notificationText: String, onApproveClicked: () -> Unit) {
+    Column(modifier = Modifier.fillMaxWidth().padding(30.dp)) {
         Text(notificationText)
 
         Row(
@@ -63,27 +53,34 @@ fun NotificationItem(notificationText: String) {
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
         ) {
-            Button(
-                onClick = { /* Handle approve action */ },
-                modifier = Modifier.weight(1f)
-            ) {
+            Button(onClick = onApproveClicked, modifier = Modifier.weight(1f)) {
                 Text("Approve", color = Color.White)
             }
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            Button(
-                onClick = { /* Handle reject action */ },
-                modifier = Modifier.weight(1f)
-            ) {
-                Text("Reject", color = Color.White)
-            }
+            // Add the Reject button and its action if needed
         }
     }
 }
 
-@Preview(showBackground = true)
 @Composable
-fun NotificationScreenPreview() {
-    NotificationScreen()
+fun NotificationList(viewModel: NotificationViewModel, paddingValues: PaddingValues) {
+    val notifications by viewModel.notifications.collectAsState()
+
+    Column(
+        modifier = Modifier.padding(paddingValues)
+    ) {
+        notifications.forEach { notification ->
+            NotificationItem(
+                notificationText = notification.message,
+                onApproveClicked = {
+                    viewModel.sendApprovalNotification(
+                        studentUserId = notification.userId,
+                        reportId = notification.relatedId,
+                        productName = notification.productName
+                    )
+                }
+            )
+            Divider(color = Color.LightGray, thickness = 1.dp)
+        }
+    }
 }
+

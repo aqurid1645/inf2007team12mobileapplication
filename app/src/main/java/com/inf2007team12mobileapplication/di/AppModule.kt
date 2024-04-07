@@ -3,6 +3,7 @@ package com.inf2007team12mobileapplication.di
 import android.app.Application
 import android.content.Context
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.codescanner.GmsBarcodeScanner
 import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
@@ -26,13 +27,18 @@ object AppModule {
 
     @Provides
     @ViewModelScoped
-    fun providesRepositoryImpl(firebaseAuth: FirebaseAuth,scanner: GmsBarcodeScanner): Repo {
-        return RepoImpt(firebaseAuth,scanner)
+    fun providesRepositoryImpl(firebaseAuth: FirebaseAuth,scanner: GmsBarcodeScanner,firebaseFirestore: FirebaseFirestore): Repo {
+        return RepoImpt(firebaseAuth,scanner,firebaseFirestore)
     }
     @ViewModelScoped
     @Provides
     fun provideContext(app: Application): Context {
         return app.applicationContext
+    }
+    @Provides
+    @ViewModelScoped
+    fun provideFirebaseFirestore(): FirebaseFirestore {
+        return FirebaseFirestore.getInstance()
     }
 
     @ViewModelScoped
